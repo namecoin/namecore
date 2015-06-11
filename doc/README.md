@@ -3,7 +3,7 @@ Namecoin Core 0.11.99
 
 Setup
 ---------------------
-[Namecoin Core](http://bitcoin.org/en/download) is the original Namecoin client and it builds the backbone of the network. However, it downloads and stores the entire history of Namecoin transactions (which is currently several GBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+[Namecoin Core](http://namecoin.org/) is the official Namecoin client and it builds the backbone of the network. However, it downloads and stores the entire history of Namecoin transactions (which is currently several GBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
 Running
 ---------------------
@@ -34,7 +34,7 @@ Drag Namecoin-Qt to your applications folder, and then run Namecoin-Qt.
 
 * See the documentation at the [Namecoin Wiki](https://wiki.namecoin.org/index.php?title=Welcome)
 for help and more information.
-* Ask for help on [#namecoin-dev](http://webchat.freenode.net?channels=namecoin-dev) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=namecoin-dev).
+* Ask for help on [#namecoin](http://webchat.freenode.net?channels=namecoin) on Freenode. If you don't have an IRC client use [webchat here](http://webchat.freenode.net?channels=namecoin-dev).
 * Ask for help on the [Namecoin forums](https://forum.namecoin.info/index.php), in the [Technical Support board](https://forum.namecoin.info/viewforum.php?f=7).
 
 Building

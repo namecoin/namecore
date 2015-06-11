@@ -1,7 +1,7 @@
 Namecoin Core integration/staging tree
 =====================================
 
-https://namecoin.info/
+https://namecoin.org/
 
 What is Namecoin? 
 ----------------

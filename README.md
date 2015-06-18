@@ -1,26 +1,36 @@
-Bitcoin Core integration/staging tree
+Namecoin Core integration/staging tree
 =====================================
 
-[![Build Status](https://travis-ci.org/bitcoin/bitcoin.svg?branch=master)](https://travis-ci.org/bitcoin/bitcoin)
+https://namecoin.org/
 
-https://www.bitcoin.org
-
-What is Bitcoin?
+What is Namecoin? 
 ----------------
 
-Bitcoin is an experimental new digital currency that enables instant payments to
-anyone, anywhere in the world. Bitcoin uses peer-to-peer technology to operate
-with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Bitcoin Core is the name of open source
-software which enables the use of this currency.
+Namecoin is a decentralized open source information registration and transfer system based on the Bitcoin cryptocurrency.
 
-For more information, as well as an immediately useable, binary version of
-the Bitcoin Core software, see https://www.bitcoin.org/en/download.
+What does it do?
+----------------
+
+Securely record and transfer arbitrary names (keys).
+Attach a value (data) to the names
+(up to 520 bytes, more in the future).
+Transact namecoins, the digital currency (ℕ, NMC).
+Namecoin was the first fork of Bitcoin and still is one of the most innovative altcoins. It was first to implement merged mining and a decentralized DNS. Namecoin squares Zooko's Triangle!
+
+What can it be used for?
+----------------
+
+Protect free-speech rights online by making the web more resistant to censorship.
+Access websites using the .bit domain (with TLS/SSL).
+Store identity information such as email, GPG key, BTC address, TLS fingerprints, Bitmessage address, etc.
+Human readable Tor .onion names/domains.
+File signatures, Voting, bonds/stocks,/shares, web of trust, escrow and notary services (to be implemented).
+
 
 License
 -------
 
-Bitcoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Namecoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see http://opensource.org/licenses/MIT.
 
 Development process
@@ -34,7 +44,7 @@ development team members simply pulls it.
 
 If it is a *more complicated or potentially controversial* change, then the patch
 submitter will be asked to start a discussion (if they haven't already) on the
-[mailing list](http://sourceforge.net/mailarchive/forum.php?forum_name=bitcoin-development).
+[forum](https://forum.namecoin.info/viewforum.php?f=8).
 
 The patch will be accepted if there is broad consensus that it is a good thing.
 Developers should expect to rework and resubmit patches if the code doesn't
@@ -57,12 +67,6 @@ lots of money.
 
 Developers are strongly encouraged to write unit tests for new code, and to
 submit new unit tests for old code. Unit tests can be compiled and run (assuming they weren't disabled in configure) with: `make check`
-
-Every pull request is built for both Windows and Linux on a dedicated server,
-and unit and sanity tests are automatically run. The binaries produced may be
-used for manual QA testing — a link to them will appear in a comment on the
-pull request posted by [BitcoinPullTester](https://github.com/BitcoinPullTester). See https://github.com/TheBlueMatt/test-scripts
-for the build/test scripts.
 
 ### Manual Quality Assurance (QA) Testing
 

@@ -1,6 +1,7 @@
 Namecoin Core integration/staging tree
 =====================================
 
+[![Build Status](https://travis-ci.org/namecoin/namecore.svg?branch=master)](https://travis-ci.org/namecoin/namecore)
 https://namecoin.org/
 
 What is Namecoin? 

@@ -4450,15 +4450,36 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         // we must use CBlocks, as CBlockHeaders won't include the 0x00 nTx count at the end
         vector<CBlock> vHeaders;
-        int nLimit = MAX_HEADERS_RESULTS;
+        unsigned nCount = 0;
+        unsigned nSize = 0;
         LogPrint("net", "getheaders %d to %s from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop.ToString(), pfrom->id);
         for (; pindex; pindex = chainActive.Next(pindex))
         {
-            vHeaders.push_back(pindex->GetBlockHeader());
-            if (--nLimit <= 0 || pindex->GetBlockHash() == hashStop)
+            const CBlockHeader header = pindex->GetBlockHeader();
+            ++nCount;
+            nSize += GetSerializeSize(header, SER_NETWORK, PROTOCOL_VERSION);
+            vHeaders.push_back(header);
+            if (nCount >= MAX_HEADERS_RESULTS
+                  || pindex->GetBlockHash() == hashStop)
+                break;
+            if (pfrom->nVersion >= SIZE_HEADERS_LIMIT_VERSION
+                  && nSize >= THRESHOLD_HEADERS_SIZE)
                 break;
         }
-        pfrom->PushMessage("headers", vHeaders);
+
+        /* Check maximum headers size before pushing the message
+           if the peer enforces it.  This should not fail since we
+           break above in the loop at the threshold and the threshold
+           should be small enough in comparison to the hard max size.
+           Do it nevertheless to be sure.  */
+        if (pfrom->nVersion >= SIZE_HEADERS_LIMIT_VERSION
+              && nSize > MAX_HEADERS_SIZE)
+            LogPrintf("ERROR: not pushing 'headers', too large\n");
+        else
+        {
+            LogPrint("net", "pushing %u headers, %u bytes\n", nCount, nSize);
+            pfrom->PushMessage("headers", vHeaders);
+        }
     }
 
 
@@ -4595,12 +4616,20 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         unsigned int nCount = ReadCompactSize(vRecv);
         if (nCount > MAX_HEADERS_RESULTS) {
             Misbehaving(pfrom->GetId(), 20);
-            return error("headers message size = %u", nCount);
+            return error("headers message count = %u", nCount);
         }
         headers.resize(nCount);
+        unsigned nSize = 0;
         for (unsigned int n = 0; n < nCount; n++) {
             vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
+
+            nSize += GetSerializeSize(headers[n], SER_NETWORK, PROTOCOL_VERSION);
+            if (pfrom->nVersion >= SIZE_HEADERS_LIMIT_VERSION
+                  && nSize > MAX_HEADERS_SIZE) {
+                Misbehaving(pfrom->GetId(), 20);
+                return error("headers message size = %u", nSize);
+            }
         }
 
         LOCK(cs_main);
@@ -4630,7 +4659,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (pindexLast)
             UpdateBlockAvailability(pfrom->GetId(), pindexLast->GetBlockHash());
 
-        if (nCount == MAX_HEADERS_RESULTS && pindexLast) {
+        bool maxSize = (nCount == MAX_HEADERS_RESULTS);
+        if (pfrom->nVersion >= SIZE_HEADERS_LIMIT_VERSION
+              && nSize >= THRESHOLD_HEADERS_SIZE)
+            maxSize = true;
+        if (maxSize && pindexLast) {
             // Headers message had its maximum size; the peer may have more headers.
             // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
             // from there instead.

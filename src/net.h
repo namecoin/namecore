@@ -49,9 +49,8 @@ static const unsigned int MAX_ADDR_TO_SEND = 1000;
  * currently acceptable).  Bitcoin has 2 MiB here, but we need more space
  * to allow for 2,000 block headers with auxpow.
  */
-/* FIXME: Possibly softfork and restrict the size of auxpows.  This would
-   allow to lower the size here with some workarounds for the historic
-   artefacts on testnet.  */
+/* FIXME: Once the headers size limit is deployed sufficiently in the network,
+   we may want to lower this again if it seems useful.  */
 static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 32 * 1024 * 1024;
 /** Maximum length of strSubVer in `version` message */
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;

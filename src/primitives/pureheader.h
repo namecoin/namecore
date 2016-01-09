@@ -10,13 +10,14 @@
 #include "uint256.h"
 
 /**
- * Encapsulate a block version.  This takes care of building it up
- * from a base version, the modifier flags (like auxpow) and
- * also the auxpow chain ID.
+ * A block header without auxpow information.  This "intermediate step"
+ * in constructing the full header is useful, because it breaks the cyclic
+ * dependency between auxpow (referencing a parent block header) and
+ * the block header (referencing an auxpow).  The parent block header
+ * does not have auxpow itself, so it is a pure header.
  */
-class CBlockVersion
+class CPureBlockHeader
 {
-
 private:
 
     /* Modifiers to the version.  */
@@ -25,12 +26,17 @@ private:
     /** Bits above are reserved for the auxpow chain ID.  */
     static const int32_t VERSION_CHAIN_START = (1 << 16);
 
-    /** The version as integer.  Should not be accessed directly.  */
-    int32_t nVersion;
-
 public:
+    // header
+    static const int32_t CURRENT_VERSION=4;
+    int32_t nVersion;
+    uint256 hashPrevBlock;
+    uint256 hashMerkleRoot;
+    uint32_t nTime;
+    uint32_t nBits;
+    uint32_t nNonce;
 
-    inline CBlockVersion()
+    CPureBlockHeader()
     {
         SetNull();
     }
@@ -40,12 +46,41 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(this->nVersion);
+        nVersion = this->GetBaseVersion();
+        READWRITE(hashPrevBlock);
+        READWRITE(hashMerkleRoot);
+        READWRITE(nTime);
+        READWRITE(nBits);
+        READWRITE(nNonce);
     }
 
-    inline void SetNull()
+    void SetNull()
     {
         nVersion = 0;
+        hashPrevBlock.SetNull();
+        hashMerkleRoot.SetNull();
+        nTime = 0;
+        nBits = 0;
+        nNonce = 0;
     }
+
+    bool IsNull() const
+    {
+        return (nBits == 0);
+    }
+
+    uint256 GetHash() const;
+
+    int64_t GetBlockTime() const
+    {
+        return (int64_t)nTime;
+    }
+
+    /* Below are methods to interpret the version with respect to
+       auxpow data and chain ID.  This used to be in the CBlockVersion
+       class, but was moved here when we switched back to nVersion being
+       a pure int member as preparation to undoing the "abuse" and
+       allowing BIP9 to work.  */
 
     /**
      * Extract the base version (without modifiers and chain ID).
@@ -53,7 +88,11 @@ public:
      */
     inline int32_t GetBaseVersion() const
     {
-        return nVersion % VERSION_AUXPOW;
+        return GetBaseVersion(nVersion);
+    }
+    static inline int32_t GetBaseVersion(int32_t ver)
+    {
+        return ver % VERSION_AUXPOW;
     }
 
     /**
@@ -85,25 +124,6 @@ public:
     }
 
     /**
-     * Extract the full version.  Used for RPC results and debug prints.
-     * @return The full version.
-     */
-    inline int32_t GetFullVersion() const
-    {
-        return nVersion;
-    }
-
-    /**
-     * Set the genesis block version.  This must be a literal write
-     * through, to get the correct historic version.
-     * @param nGenesisVersion The version to set.
-     */
-    inline void SetGenesisVersion(int32_t nGenesisVersion)
-    {
-        nVersion = nGenesisVersion;
-    }
-
-    /**
      * Check if the auxpow flag is set in the version.
      * @return True iff this block version is marked as auxpow.
      */
@@ -116,7 +136,7 @@ public:
      * Set the auxpow flag.  This is used for testing.
      * @param auxpow Whether to mark auxpow as true.
      */
-    inline void SetAuxpow (bool auxpow)
+    inline void SetAuxpowVersion (bool auxpow)
     {
         if (auxpow)
             nVersion |= VERSION_AUXPOW;
@@ -131,67 +151,6 @@ public:
     inline bool IsLegacy() const
     {
         return nVersion == 1;
-    }
-
-};
-
-/**
- * A block header without auxpow information.  This "intermediate step"
- * in constructing the full header is useful, because it breaks the cyclic
- * dependency between auxpow (referencing a parent block header) and
- * the block header (referencing an auxpow).  The parent block header
- * does not have auxpow itself, so it is a pure header.
- */
-class CPureBlockHeader
-{
-public:
-    // header
-    static const int32_t CURRENT_VERSION=4;
-    CBlockVersion nVersion;
-    uint256 hashPrevBlock;
-    uint256 hashMerkleRoot;
-    uint32_t nTime;
-    uint32_t nBits;
-    uint32_t nNonce;
-
-    CPureBlockHeader()
-    {
-        SetNull();
-    }
-
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion.GetBaseVersion();
-        READWRITE(hashPrevBlock);
-        READWRITE(hashMerkleRoot);
-        READWRITE(nTime);
-        READWRITE(nBits);
-        READWRITE(nNonce);
-    }
-
-    void SetNull()
-    {
-        nVersion.SetNull();
-        hashPrevBlock.SetNull();
-        hashMerkleRoot.SetNull();
-        nTime = 0;
-        nBits = 0;
-        nNonce = 0;
-    }
-
-    bool IsNull() const
-    {
-        return (nBits == 0);
-    }
-
-    uint256 GetHash() const;
-
-    int64_t GetBlockTime() const
-    {
-        return (int64_t)nTime;
     }
 };
 

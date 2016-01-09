@@ -571,7 +571,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("capabilities", aCaps));
-    result.push_back(Pair("version", pblock->nVersion.GetFullVersion()));
+    result.push_back(Pair("version", pblock->nVersion));
     result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
@@ -905,7 +905,7 @@ UniValue getauxblock(const UniValue& params, bool fHelp)
             // Finalise it by setting the version and building the merkle root
             CBlock* pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
-            pblock->nVersion.SetAuxpow(true);
+            pblock->SetAuxpowVersion(true);
 
             // Save
             mapNewBlock[pblock->GetHash()] = pblock;
@@ -923,7 +923,7 @@ UniValue getauxblock(const UniValue& params, bool fHelp)
 
         UniValue result(UniValue::VOBJ);
         result.push_back(Pair("hash", block.GetHash().GetHex()));
-        result.push_back(Pair("chainid", block.nVersion.GetChainId()));
+        result.push_back(Pair("chainid", block.GetChainId()));
         result.push_back(Pair("previousblockhash", block.hashPrevBlock.GetHex()));
         result.push_back(Pair("coinbasevalue", (int64_t)block.vtx[0].vout[0].nValue));
         result.push_back(Pair("bits", strprintf("%08x", block.nBits)));

@@ -81,12 +81,12 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 
     /* Initialise the block version.  */
     const int32_t nChainId = chainparams.GetConsensus ().nAuxpowChainId;
-    pblock->nVersion.SetBaseVersion(CBlockHeader::CURRENT_VERSION, nChainId);
+    pblock->SetBaseVersion(CBlockHeader::CURRENT_VERSION, nChainId);
 
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
-        pblock->nVersion.SetBaseVersion(GetArg("-blockversion", pblock->nVersion.GetBaseVersion()), nChainId);
+        pblock->SetBaseVersion(GetArg("-blockversion", pblock->GetBaseVersion()), nChainId);
 
     // Create coinbase tx
     CMutableTransaction txNew;

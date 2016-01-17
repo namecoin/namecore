@@ -18,20 +18,11 @@ class GetAuxBlockTest (BitcoinTestFramework):
     # Generate a block so that we are not "downloading blocks".
     self.nodes[0].generate (1)
 
-    # Compare basic data of getauxblock to getblocktemplate.
-    auxblock = self.nodes[0].getauxblock ()
-    blocktemplate = self.nodes[0].getblocktemplate ()
-    assert_equal (auxblock['coinbasevalue'], blocktemplate['coinbasevalue'])
-    assert_equal (auxblock['bits'], blocktemplate['bits'])
-    assert_equal (auxblock['height'], blocktemplate['height'])
-    assert_equal (auxblock['previousblockhash'], blocktemplate['previousblockhash'])
-
-    # Compare target and take byte order into account.
-    target = auxblock['_target']
-    reversedTarget = auxpow.reverseHex (target)
-    assert_equal (reversedTarget, blocktemplate['target'])
+    # We used to compare to getblocktemplate, but this call is gone
+    # now completely for merge-mining.
 
     # Verify data that can be found in another way.
+    auxblock = self.nodes[0].getauxblock ()
     assert_equal (auxblock['chainid'], 1)
     assert_equal (auxblock['height'], self.nodes[0].getblockcount () + 1)
     assert_equal (auxblock['previousblockhash'], self.nodes[0].getblockhash (auxblock['height'] - 1))
@@ -67,8 +58,7 @@ class GetAuxBlockTest (BitcoinTestFramework):
     self.sync_all ()
     assert_equal (self.nodes[1].getrawmempool (), [txid])
     auxblock = self.nodes[0].getauxblock ()
-    blocktemplate = self.nodes[0].getblocktemplate ()
-    target = blocktemplate['target']
+    target = auxpow.reverseHex (auxblock['_target'])
 
     # Compute invalid auxpow.
     apow = auxpow.computeAuxpow (auxblock['hash'], target, False)

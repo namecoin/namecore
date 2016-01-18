@@ -439,6 +439,35 @@ class CTransaction(object):
         return "CTransaction(nVersion=%i vin=%s vout=%s nLockTime=%i)" \
             % (self.nVersion, repr(self.vin), repr(self.vout), self.nLockTime)
 
+class CAuxPow(CTransaction):
+    def __init__(self):
+        super(CAuxPow, self).__init__()
+        self.hashBlock = 0
+        self.vMerkleBranch = []
+        self.nIndex = 0
+        self.vChainMerkleBranch = []
+        self.nChainIndex = 0
+        self.parentBlock = CBlockHeader()
+
+    def deserialize(self, f):
+        super(CAuxPow, self).deserialize(f)
+        self.hashBlock = deser_uint256(f)
+        self.vMerkleBranch = deser_uint256_vector(f)
+        self.nIndex = struct.unpack("<I", f.read(4))[0]
+        self.vChainMerkleBranch = deser_uint256_vector(f)
+        self.nChainIndex = struct.unpack("<I", f.read(4))[0]
+        self.parentBlock.deserialize(f)
+
+    def serialize(self):
+        r = ""
+        r += super(CAuxPow, self).serialize()
+        r += ser_uint256(self.hashBlock)
+        r += ser_uint256_vector(self.vMerkleBranch)
+        r += struct.pack("<I", self.nIndex)
+        r += ser_uint256_vector(self.vChainMerkleBranch)
+        r += struct.pack("<I", self.nChainIndex)
+        r += self.parentBlock.serialize()
+        return r
 
 class CBlockHeader(object):
     def __init__(self, header=None):
@@ -451,6 +480,7 @@ class CBlockHeader(object):
             self.nTime = header.nTime
             self.nBits = header.nBits
             self.nNonce = header.nNonce
+            self.auxpow = header.auxpow
             self.sha256 = header.sha256
             self.hash = header.hash
             self.calc_sha256()
@@ -462,12 +492,16 @@ class CBlockHeader(object):
         self.nTime = 0
         self.nBits = 0
         self.nNonce = 0
+        self.auxpow = None
         self.sha256 = None
         self.hash = None
 
     def set_base_version(self, n):
         assert n < VERSION_AUXPOW
         self.nVersion = n + CHAIN_ID * VERSION_CHAIN_START
+
+    def is_auxpow(self):
+        return (self.nVersion & VERSION_AUXPOW) > 0
 
     def deserialize(self, f):
         self.nVersion = struct.unpack("<i", f.read(4))[0]
@@ -476,15 +510,13 @@ class CBlockHeader(object):
         self.nTime = struct.unpack("<I", f.read(4))[0]
         self.nBits = struct.unpack("<I", f.read(4))[0]
         self.nNonce = struct.unpack("<I", f.read(4))[0]
+        if self.is_auxpow():
+            self.auxpow = CAuxPow()
+            self.auxpow.deserialize(f)
         self.sha256 = None
         self.hash = None
 
-        # auxpow serialisation is not implemented.  Make sure that
-        # it is not needed.
-        assert (self.nVersion & VERSION_AUXPOW) == 0
-
     def serialize(self):
-        assert (self.nVersion & VERSION_AUXPOW) == 0
         r = ""
         r += struct.pack("<i", self.nVersion)
         r += ser_uint256(self.hashPrevBlock)
@@ -492,6 +524,8 @@ class CBlockHeader(object):
         r += struct.pack("<I", self.nTime)
         r += struct.pack("<I", self.nBits)
         r += struct.pack("<I", self.nNonce)
+        if self.is_auxpow():
+            r += self.auxpow.serialize()
         return r
 
     def calc_sha256(self):
@@ -548,6 +582,11 @@ class CBlock(CBlockHeader):
     def is_valid(self):
         self.calc_sha256()
         target = uint256_from_compact(self.nBits)
+
+        # FIXME: Validation is not actually used anywhere.  If it is in
+        # the future, need to implement basic auxpow checking.
+        assert not self.is_auxpow()
+
         if self.sha256 > target:
             return False
         for tx in self.vtx:

@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
-// Copyright (c) 2014-2015 Daniel Kraft
+// Copyright (c) 2014-2016 Daniel Kraft
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,6 +16,7 @@
 #include <vector>
 
 class CBlock;
+class CBlockHeader;
 class CBlockIndex;
 
 /** Header for merge-mining data in the coinbase.  */
@@ -174,6 +175,15 @@ public:
   static uint256 CheckMerkleBranch (uint256 hash,
                                     const std::vector<uint256>& vMerkleBranch,
                                     int nIndex);
+
+  /**
+   * Initialise the auxpow of the given block header.  This constructs
+   * a minimal CAuxPow object with a minimal parent block and sets
+   * it on the block header.  The auxpow is not necessarily valid, but
+   * can be "mined" to make it valid.
+   * @param header The header to set the auxpow on.
+   */
+  static void initAuxPow (CBlockHeader& header);
 
 };
 

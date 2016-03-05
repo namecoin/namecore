@@ -81,12 +81,12 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 
     /* Initialise the block version.  */
     const int32_t nChainId = chainparams.GetConsensus ().nAuxpowChainId;
-    pblock->nVersion.SetBaseVersion(CBlockHeader::CURRENT_VERSION, nChainId);
+    pblock->SetBaseVersion(CBlockHeader::CURRENT_VERSION, nChainId);
 
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
-        pblock->nVersion.SetBaseVersion(GetArg("-blockversion", pblock->nVersion.GetBaseVersion()), nChainId);
+        pblock->SetBaseVersion(GetArg("-blockversion", pblock->GetBaseVersion()), nChainId);
 
     // Create coinbase tx
     CMutableTransaction txNew;
@@ -371,7 +371,7 @@ void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned
 // nonce is 0xffff0000 or above, the block is rebuilt and nNonce starts over at
 // zero.
 //
-bool static ScanHash(const CBlockHeader *pblock, uint32_t& nNonce, uint256 *phash)
+bool static ScanHash(const CPureBlockHeader *pblock, uint32_t& nNonce, uint256 *phash)
 {
     // Write the first 76 bytes of the block header to a double-SHA256 state.
     CHash256 hasher;
@@ -469,6 +469,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             }
             CBlock *pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+            CAuxPow::initAuxPow(*pblock);
 
             LogPrintf("Running BitcoinMiner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
@@ -482,13 +483,13 @@ void static BitcoinMiner(const CChainParams& chainparams)
             uint32_t nNonce = 0;
             while (true) {
                 // Check if something found
-                if (ScanHash(pblock, nNonce, &hash))
+                if (ScanHash(&pblock->auxpow->parentBlock, nNonce, &hash))
                 {
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
-                        pblock->nNonce = nNonce;
-                        assert(hash == pblock->GetHash());
+                        pblock->auxpow->parentBlock.nNonce = nNonce;
+                        assert(hash == pblock->auxpow->getParentBlockHash());
 
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
                         LogPrintf("BitcoinMiner:\n");
@@ -526,6 +527,10 @@ void static BitcoinMiner(const CChainParams& chainparams)
                     // Changing pblock->nTime can change work required on testnet:
                     hashTarget.SetCompact(pblock->nBits);
                 }
+
+                /* If we updated the block above, we also have to update
+                   the auxpow object to match the new block hash.  */
+                CAuxPow::initAuxPow(*pblock);
             }
         }
     }

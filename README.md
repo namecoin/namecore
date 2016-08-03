@@ -1,6 +1,8 @@
 Namecoin Core integration/staging tree
 =====================================
 
+Testing a Travis CI build of a PR; nothing to see here.
+
 [![Build Status](https://travis-ci.org/namecoin/namecoin-core.svg?branch=master)](https://travis-ci.org/namecoin/namecoin-core)
 
 https://namecoin.org

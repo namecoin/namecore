@@ -73,7 +73,7 @@ script:
     - if [ "$STATIC_ANALYSIS" != 1 ]; then mkdir build && cd build ; fi 
     - if [ "$STATIC_ANALYSIS" != 1 ]; then ../configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG || ( cat config.log && false); fi 
     - if [ "$STATIC_ANALYSIS" != 1 ]; then make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && make $GOAL V=1 ; false ); fi 
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin+bitcoin:bitcoin; fi
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin +bitcoin:bitcoin; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "bitcoin..$TRAVIS_COMMIT" -c "./autogen.sh && mkdir build && cd build && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL"; fi 
     - export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/depends/$HOST/lib
     - if [ "$RUN_TESTS" = "true" ]; then make $MAKEJOBS check VERBOSE=1; fi

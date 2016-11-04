@@ -41,12 +41,13 @@ env:
 # Cross-Mac
     - HOST=x86_64-apple-darwin11 PACKAGES="cmake imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev" BITCOIN_CONFIG="--enable-gui --enable-reduce-exports" OSX_SDK=10.11 GOAL="deploy"
 # static analysis 
-    - STATIC_ANALYSIS=1 HOST=x86_64-unknown-linux-gnu PACKAGES="bc python3-zmq csbuild" DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1" RUN_TESTS=true GOAL="install" BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
+    - STATIC_ANALYSIS=1 HOST=x86_64-unknown-linux-gnu PACKAGES="bc python3-zmq" DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1" RUN_TESTS=true GOAL="install" BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports CPPFLAGS=-DDEBUG_LOCKORDER"
 before_install:
     - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get update -qq; fi 
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get install -qq apt-transport-https; fi 
     - if [ "$STATIC_ANALYSIS" = 1 ]; then echo "deb https://kdudka.fedorapeople.org/csbuild trusty contrib" | sudo tee -a /etc/apt/sources.list; fi 
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then travis_retry sudo apt-get install -qq -y --force-yes csbuild; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get update -qq; fi 
 install:
     - if [ -n "$PPA" ]; then travis_retry sudo add-apt-repository "$PPA" -y; fi

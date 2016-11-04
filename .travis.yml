@@ -45,7 +45,7 @@ env:
 before_install:
     - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get update -qq; fi 
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then sudp apt-get install -qq apt-transport-https; fi 
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get install -qq apt-transport-https; fi 
     - if [ "$STATIC_ANALYSIS" = 1 ]; then echo "deb https://kdudka.fedorapeople.org/csbuild trusty contrib" | sudo tee -a /etc/apt/sources.list; fi 
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get update --qq; fi 
 install:

@@ -75,7 +75,7 @@ const map<unsigned char, string> mapSigHashTypes =
 string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
 {
     string str;
-    opcodetype opcode;
+    opcodetype opcode, lastopcode;
     vector<unsigned char> vch;
     CScript::const_iterator pc = script.begin();
     while (pc < script.end()) {
@@ -88,7 +88,12 @@ string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
         }
         if (0 <= opcode && opcode <= OP_PUSHDATA4) {
             if (vch.size() <= static_cast<vector<unsigned char>::size_type>(4)) {
-                str += strprintf("%d", CScriptNum(vch, false).getint());
+                if ( (lastopcode == OP_NAME_NEW || lastopcode == OP_NAME_UPDATE || lastopcode == OP_NAME_FIRSTUPDATE )
+                    && vch.size() > static_cast<vector<unsigned char>::size_type>(0) ) {
+                        str += HexStr(vch);
+                } else {
+                    str += strprintf("%d", CScriptNum(vch, false).getint());
+                }
             } else {
                 // the IsUnspendable check makes sure not to try to decode OP_RETURN data that may match the format of a signature
                 if (fAttemptSighashDecode && !script.IsUnspendable()) {
@@ -112,6 +117,7 @@ string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
         } else {
             str += GetOpName(opcode);
         }
+        lastopcode=opcode;
     }
     return str;
 }

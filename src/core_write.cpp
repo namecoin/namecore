@@ -75,7 +75,7 @@ const map<unsigned char, string> mapSigHashTypes =
 string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
 {
     string str;
-    opcodetype opcode, lastopcode;
+    opcodetype opcode, lastopcode=OP_0;
     vector<unsigned char> vch;
     CScript::const_iterator pc = script.begin();
     while (pc < script.end()) {
@@ -89,7 +89,7 @@ string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode)
         if (0 <= opcode && opcode <= OP_PUSHDATA4) {
             if (vch.size() <= static_cast<vector<unsigned char>::size_type>(4)) {
                 if ( (lastopcode == OP_NAME_NEW || lastopcode == OP_NAME_UPDATE || lastopcode == OP_NAME_FIRSTUPDATE )
-                    && vch.size() > static_cast<vector<unsigned char>::size_type>(0) ) {
+                    && !vch.empty() ) {
                         str += HexStr(vch);
                 } else {
                     str += strprintf("%d", CScriptNum(vch, false).getint());

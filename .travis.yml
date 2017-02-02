@@ -83,7 +83,7 @@ script:
 #    - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && mkdir build && cd build && ../configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make distdir VERSION=$HOST && cd bitcoin-$HOST && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi
 # without "make distdir":
 # Note: if the build is timing out due to the depends step failing to cache, uncomment the following line, push, and then recomment it.
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then UPSTREAM_BRANCH="fail_now_this_is_not_a_real_branch"; fi
+#    - if [ "$STATIC_ANALYSIS" = 1 ]; then UPSTREAM_BRANCH="fail_now_this_is_not_a_real_branch"; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then echo "printing csbuild stderr last 100 lines..." ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then tail --lines=100 $CSBUILD_STDERR_LOG ; fi

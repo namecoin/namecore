@@ -49,8 +49,6 @@ before_install:
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get install -qq apt-transport-https ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then echo "deb [trusted=yes] https://kdudka.fedorapeople.org/csbuild trusty contrib" | sudo tee -a /etc/apt/sources.list ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then sudo apt-get update -qq ; fi
-# TODO: move this to right before the csbuild command
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin 'bitcoin':'bitcoin' ; fi
 install:
     - if [ -n "$PPA" ]; then travis_retry sudo add-apt-repository "$PPA" -y; fi
     - if [ -n "$DPKG_ADD_ARCH" ]; then sudo dpkg --add-architecture "$DPKG_ADD_ARCH" ; fi
@@ -79,11 +77,14 @@ script:
     - if [ "$STATIC_ANALYSIS" != 1 ]; then make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && make $GOAL V=1 ; false ) ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then CSBUILD_STDERR_LOG=`pwd`/csbuild_stderr.log ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then UPSTREAM_BRANCH="bitcoin"; fi
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin '$UPSTREAM_BRANCH':'$UPSTREAM_BRANCH' ; fi
 # TODO: does csbuild need the "make distdir" stuff?
 # with "make distdir":
 #    - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && mkdir build && cd build && ../configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make distdir VERSION=$HOST && cd bitcoin-$HOST && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi
 # without "make distdir":
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && mkdir build && cd build && ../configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi
+# Note: if the build is timing out due to the depends step failing to cache, uncomment the following line, push, and then recomment it.
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then UPSTREAM_BRANCH="fail_now_this_is_not_a_real_branch"; fi
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then echo "printing csbuild stderr last 100 lines..." ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then tail --lines=100 $CSBUILD_STDERR_LOG ; fi
     - export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/depends/$HOST/lib

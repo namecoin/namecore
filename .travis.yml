@@ -77,7 +77,7 @@ script:
     - if [ "$STATIC_ANALYSIS" != 1 ]; then make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && make $GOAL V=1 ; false ) ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then CSBUILD_STDERR_LOG=`pwd`/csbuild_stderr.log ; fi
     - if [ "$STATIC_ANALYSIS" = 1 ]; then UPSTREAM_BRANCH="bitcoin"; fi
-    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin '$UPSTREAM_BRANCH':'$UPSTREAM_BRANCH' ; fi
+    - if [ "$STATIC_ANALYSIS" = 1 ]; then git fetch origin "$UPSTREAM_BRANCH":"$UPSTREAM_BRANCH" ; fi
 # TODO: does csbuild need the "make distdir" stuff?
 # with "make distdir":
 #    - if [ "$STATIC_ANALYSIS" = 1 ]; then csbuild --git-commit-range "$UPSTREAM_BRANCH..$TRAVIS_COMMIT" -c "./autogen.sh && mkdir build && cd build && ../configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make distdir VERSION=$HOST && cd bitcoin-$HOST && ./configure $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG && make $MAKEJOBS $GOAL" 2> $CSBUILD_STDERR_LOG ; fi

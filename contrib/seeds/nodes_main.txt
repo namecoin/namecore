@@ -19,6 +19,8 @@
 
 # Explicitly contributed fixed-IP nodes.
 76.74.177.197:8334
+45.33.65.68:8334
+[2600:3c03::f03c:91ff:fe37:6461]:8334
 
 # Known .onion addresses of nodes.
 fp7k2dennh52dzql.onion

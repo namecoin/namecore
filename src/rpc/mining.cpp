@@ -870,15 +870,17 @@ UniValue estimatesmartfee(const JSONRPCRequest& request)
 /* ************************************************************************** */
 /* Merge mining.  */
 
-/* The variables below are used to keep track of created and not yet
-       submitted auxpow blocks.  Lock them to be sure even for multiple
-       RPC threads running in parallel.  */
+/**
+ * The variables below are used to keep track of created and not yet
+ * submitted auxpow blocks.  Lock them to be sure even for multiple
+ * RPC threads running in parallel.
+ */
 static CCriticalSection cs_auxblockCache;
 static std::map<uint256, CBlock*> mapNewBlock;
 static std::vector<std::unique_ptr<CBlockTemplate>> vNewBlockTemplate;
 
 static 
-void _AuxMiningCheck()
+void AuxMiningCheck()
 {
     if(!g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
@@ -900,9 +902,9 @@ void _AuxMiningCheck()
 }
 
 static 
-UniValue _CreateAuxBlock(const CScript& scriptPubKey)
+UniValue AuxMiningCreateBlock(const CScript& scriptPubKey)
 {
-    _AuxMiningCheck();
+    AuxMiningCheck();
 
     LOCK(cs_auxblockCache);
 
@@ -968,9 +970,9 @@ UniValue _CreateAuxBlock(const CScript& scriptPubKey)
 }
 
 static
-bool _SumbitAuxBlock(const std::string& hashHex, const std::string& auxpowHex)
+bool AuxMiningSubmitBlock(const std::string& hashHex, const std::string& auxpowHex)
 {
-    _AuxMiningCheck();
+    AuxMiningCheck();
 
     LOCK(cs_auxblockCache);
 
@@ -991,7 +993,8 @@ bool _SumbitAuxBlock(const std::string& hashHex, const std::string& auxpowHex)
 
     submitblock_StateCatcher sc(block.GetHash());
     RegisterValidationInterface(&sc);
-    std::shared_ptr<const CBlock> shared_block = std::make_shared<const CBlock>(block);
+    std::shared_ptr<const CBlock> shared_block 
+      = std::make_shared<const CBlock>(block);
     bool fAccepted = ProcessNewBlock(Params(), shared_block, true, nullptr);
     UnregisterValidationInterface(&sc);
 
@@ -1043,14 +1046,14 @@ UniValue getauxblock(const JSONRPCRequest& request)
     /* Create a new block */
     if (request.params.size() == 0)
     {
-        return _CreateAuxBlock(coinbaseScript->reserveScript);
+        return AuxMiningCreateBlock(coinbaseScript->reserveScript);
     }
 
     /* Submit a block instead.  Note that this need not lock cs_main,
        since ProcessNewBlock below locks it instead.  */
     assert(request.params.size() == 2);
-    bool fAccepted = _SumbitAuxBlock(request.params[0].get_str(), 
-                                     request.params[1].get_str());
+    bool fAccepted = AuxMiningSubmitBlock(request.params[0].get_str(), 
+                                          request.params[1].get_str());
     if (fAccepted)
         coinbaseScript->KeepScript();
 
@@ -1061,7 +1064,7 @@ UniValue createauxblock(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "createauxblock (address)\n"
+            "createauxblock <address>\n"
             "\ncreate a new block and return information required to merge-mine it.\n"
             "\nArguments:\n"
             "1. address      (string, required) specify coinbase transaction payout address\n"
@@ -1076,25 +1079,24 @@ UniValue createauxblock(const JSONRPCRequest& request)
             "  \"_target\"            (string) target in reversed byte order, deprecated\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("createauxblock", "address")
-            + HelpExampleRpc("createauxblock", "")
+            + HelpExampleCli("createauxblock", "\"address\"")
+            + HelpExampleRpc("createauxblock", "\"address\"")
             );
 
     // Check coinbase payout address
-    CScript scriptPubKey;
     CBitcoinAddress coinbaseAddress(request.params[0].get_str());
     if (!coinbaseAddress.IsValid())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid coinbase payout address");
-    scriptPubKey = GetScriptForDestination(coinbaseAddress.Get());
+    const CScript scriptPubKey = GetScriptForDestination(coinbaseAddress.Get());
 
-    return _CreateAuxBlock(scriptPubKey);
+    return AuxMiningCreateBlock(scriptPubKey);
 }
 
 UniValue submitauxblock(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
         throw std::runtime_error(
-            "submitauxblock (hash auxpow)\n"
+            "submitauxblock <hash> <auxpow>\n"
             "\nsubmit a solved auxpow for a previously block created by 'createauxblock'.\n"
             "\nArguments:\n"
             "1. hash      (string, required) hash of the block to submit\n"
@@ -1103,11 +1105,11 @@ UniValue submitauxblock(const JSONRPCRequest& request)
             "xxxxx        (boolean) whether the submitted block was correct\n"
             "\nExamples:\n"
             + HelpExampleCli("submitauxblock", "\"hash\" \"serialised auxpow\"")
-            + HelpExampleRpc("submitauxblock", "")
+            + HelpExampleRpc("submitauxblock", "\"hash\" \"serialised auxpow\"")
             );
 
-    return _SumbitAuxBlock(request.params[0].get_str(), 
-                           request.params[1].get_str());
+    return AuxMiningSubmitBlock(request.params[0].get_str(), 
+                                request.params[1].get_str());
 }
 
 

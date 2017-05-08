@@ -119,6 +119,7 @@ BASE_SCRIPTS= [
 
     # auxpow tests
     'getauxblock.py',
+    'create_submit_auxblock.py',
 
     # name tests
     'name_expiration.py',

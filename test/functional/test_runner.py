@@ -118,6 +118,18 @@ BASE_SCRIPTS= [
 
     # auxpow tests
     'getauxblock.py',
+    'create_submit_auxblock.py',
+
+    # name tests
+    'name_expiration.py',
+    'name_list.py',
+    'name_multisig.py',
+    'name_pending.py',
+    'name_rawtx.py',
+    'name_registration.py',
+    'name_reorg.py',
+    'name_scanning.py',
+    'name_wallet.py',
 ]
 
 EXTENDED_SCRIPTS = [

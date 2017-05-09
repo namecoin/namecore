@@ -88,9 +88,6 @@ class KeyPoolTest(BitcoinTestFramework):
         self.setup_clean_chain = False
         self.num_nodes = 1
 
-    def setup_network(self):
-        self.nodes = self.setup_nodes()
-
 def test_auxpow(nodes):
     """
     Test behaviour of getauxpow.  Calling getauxpow should reserve

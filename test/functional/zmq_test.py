@@ -29,7 +29,9 @@ class ZMQTest (BitcoinTestFramework):
 
         # Check that bitcoin has been built with ZMQ enabled
         config = configparser.ConfigParser()
-        config.read_file(open(os.path.dirname(__file__) + "/config.ini"))
+        if not self.options.configfile:
+            self.options.configfile = os.path.dirname(__file__) + "/config.ini"
+        config.read_file(open(self.options.configfile))
 
         if not config["components"].getboolean("ENABLE_ZMQ"):
             self.log.warning("bitcoind has not been built with zmq enabled. Skipping zmq tests!")
@@ -40,7 +42,7 @@ class ZMQTest (BitcoinTestFramework):
         self.zmqSubSocket.setsockopt(zmq.SUBSCRIBE, b"hashblock")
         self.zmqSubSocket.setsockopt(zmq.SUBSCRIBE, b"hashtx")
         self.zmqSubSocket.connect("tcp://127.0.0.1:%i" % self.port)
-        return start_nodes(self.num_nodes, self.options.tmpdir, extra_args=[
+        self.nodes = start_nodes(self.num_nodes, self.options.tmpdir, extra_args=[
             ['-zmqpubhashtx=tcp://127.0.0.1:'+str(self.port), '-zmqpubhashblock=tcp://127.0.0.1:'+str(self.port)],
             [],
             [],

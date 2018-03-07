@@ -20,6 +20,7 @@
 #include <wallet/walletdb.h>
 #include <wallet/rpcwallet.h>
 
+#include "names/common.h"
 #include "script/names.h"
 
 #include <algorithm>
@@ -1120,6 +1121,18 @@ public:
      * This function will automatically add the necessary scripts to the wallet.
      */
     CTxDestination AddAndGetDestinationForScript(const CScript& script, OutputType);
+
+    std::map<std::string, CNamePendingData> namePendingMap;
+
+    bool PendingNameFirstUpdateExists(const std::string &name);
+    bool WritePendingNameFirstUpdate(
+            const std::string &name,
+            const std::string &rand,
+            const std::string &txid,
+            const std::string &data,
+            const std::string &toaddress);
+    bool ErasePendingNameFirstUpdate(const std::string &name);
+    bool GetPendingNameFirstUpdate(const std::string &name, CNamePendingData *data=nullptr);
 };
 
 /** A key allocated from the key pool. */

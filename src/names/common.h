@@ -5,10 +5,12 @@
 #ifndef H_BITCOIN_NAMES_COMMON
 #define H_BITCOIN_NAMES_COMMON
 
+#include <base58.h>
 #include <compat/endian.h>
 #include <primitives/transaction.h>
 #include <script/script.h>
 #include <serialize.h>
+#include <uint256.h>
 
 #include <map>
 #include <set>
@@ -475,6 +477,52 @@ public:
   /* Write all cached changes to a database batch update object.  */
   void writeBatch (CDBBatch& batch) const;
 
+};
+
+/* ************************************************************************** */
+/* CNamePendingData.  */
+
+/**
+ * Keeps track of name_new data for a pending name_firstupdate. This is
+ * serialized to the wallet so that the firstupdate can be broadcast
+ * between client runs.
+ */
+class CNamePendingData
+{
+private:
+    CScript toAddress;
+    uint256 hex;
+    uint160 rand;
+    valtype vchData;
+
+public:
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE (*(CScriptBase*)(&toAddress));
+        READWRITE(hex);
+        READWRITE(rand);
+        READWRITE(vchData);
+    }
+
+    inline const std::string getToAddress()
+    {
+        CTxDestination dest;
+        if (ExtractDestination (toAddress, dest))
+            return EncodeDestination (dest);
+        return "";
+    }
+    inline const std::string getHex() { return hex.GetHex(); }
+    inline const std::string getRand() { return rand.GetHex(); }
+    inline const std::string getData() { return ValtypeToString(vchData); }
+
+    inline void setToAddress(const std::string &strToAddress) {
+        toAddress = GetScriptForDestination(DecodeDestination(strToAddress));
+    }
+    inline void setHex(const std::string &strHex) { hex.SetHex(strHex); }
+    inline void setRand(const std::string &strRand) { rand.SetHex(strRand); }
+    inline void setData(const std::string &strData) { vchData = ValtypeFromString(strData); }
 };
 
 #endif // H_BITCOIN_NAMES_COMMON

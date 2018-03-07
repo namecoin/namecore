@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ManageNamesPage</class>
+ <widget class="QWidget" name="ManageNamesPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>776</width>
+    <height>364</height>
+   </rect>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QFrame" name="frame2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>&amp;New name:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>registerName</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QValidatedLineEdit" name="registerName">
+        <property name="toolTip">
+         <string>Enter a name or domain name (prefixed with d/) to be registered via Namecoin.</string>
+        </property>
+        <property name="text">
+         <string>d/</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use &lt;span style=&quot; font-weight:600;&quot;&gt;d/&lt;/span&gt; prefix for domain names. E.g. &lt;span style=&quot; font-weight:600;&quot;&gt;d/mysite&lt;/span&gt; will register &lt;span style=&quot; font-weight:600;&quot;&gt;mysite.bit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;See &lt;a href=&quot;https://wiki.namecoin.info/index.php?title=Domain_Name_Specification&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Domain names&lt;/span&gt;&lt;/a&gt; in Namecoin wiki for reference. Other prefixes can be used for miscellaneous purposes (not domain names).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="submitNameButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Confirm the new name action. Sends name_new transaction
+to the network and creates a pending name_firstupdate transaction.</string>
+        </property>
+        <property name="text">
+         <string>&amp;Submit</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../bitcoin.qrc">
+          <normaloff>:/icons/send</normaloff>:/icons/send</iconset>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Maximum</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>12</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Your registered names (pending and unconfirmed names have blank expiration):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>registerName</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableView" name="tableView">
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="toolTip">
+         <string>Double-click name to configure</string>
+        </property>
+        <property name="tabKeyNavigation">
+         <bool>false</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QPushButton" name="configureNameButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Configure name and submit update operation</string>
+          </property>
+          <property name="text">
+           <string>&amp;Configure Name...</string>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="renewNameButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Renew the name with its current value</string>
+          </property>
+          <property name="text">
+           <string>&amp;Renew Name</string>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>../../src/qt/qvalidatedlineedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../bitcoin.qrc"/>
+ </resources>
+ <connections/>
+</ui>

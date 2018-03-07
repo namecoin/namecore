@@ -9,6 +9,7 @@
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <fs.h>
+#include <names/common.h>
 #include <protocol.h>
 #include <serialize.h>
 #include <sync.h>
@@ -148,6 +149,16 @@ bool CWalletDB::ErasePool(int64_t nPool)
 bool CWalletDB::WriteMinVersion(int nVersion)
 {
     return WriteIC(std::string("minversion"), nVersion);
+}
+
+bool CWalletDB::WriteNameFirstUpdate(const std::string& name, const CNamePendingData& data)
+{
+    return WriteIC(std::make_pair(std::string("pending_firstupdate"), name), data);
+}
+
+bool CWalletDB::EraseNameFirstUpdate(const std::string& name)
+{
+    return EraseIC(std::make_pair(std::string("pending_firstupdate"), name));
 }
 
 bool CWalletDB::ReadAccount(const std::string& strAccount, CAccount& account)
@@ -460,6 +471,17 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             ssValue >> keypool;
 
             pwallet->LoadKeyPool(nIndex, keypool);
+        }
+        else if (strType == "pending_firstupdate")
+        {
+            std::string strName;
+            ssKey >> strName;
+
+            CNamePendingData pending;
+            ssValue >> pending;
+
+            pwallet->namePendingMap[strName] = pending;
+            LogPrintf("Loaded pending name_firstupdate %s\n", strName);
         }
         else if (strType == "version")
         {

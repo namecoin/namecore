@@ -5,6 +5,7 @@
 #ifndef BITCOIN_QT_WALLETMODEL_H
 #define BITCOIN_QT_WALLETMODEL_H
 
+#include <names/common.h>
 #include <qt/paymentrequestplus.h>
 #include <qt/walletmodeltransaction.h>
 
@@ -13,7 +14,7 @@
 #include <map>
 #include <vector>
 
-#include <QObject>
+#include <QWidget>
 
 enum OutputType : int;
 
@@ -21,6 +22,7 @@ class AddressTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
+class NameTableModel;
 class TransactionTableModel;
 class WalletModelTransaction;
 
@@ -97,12 +99,12 @@ public:
 };
 
 /** Interface to Bitcoin wallet from Qt view code. */
-class WalletModel : public QObject
+class WalletModel : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit WalletModel(const PlatformStyle *platformStyle, CWallet *wallet, OptionsModel *optionsModel, QObject *parent = 0);
+    explicit WalletModel(const PlatformStyle *platformStyle, CWallet *wallet, OptionsModel *optionsModel, QWidget *parent = 0);
     ~WalletModel();
 
     enum StatusCode // Returned by sendCoins
@@ -129,6 +131,7 @@ public:
     OptionsModel *getOptionsModel();
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
+    NameTableModel *getNameTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = nullptr) const;
@@ -209,6 +212,25 @@ public:
     bool transactionCanBeAbandoned(uint256 hash) const;
     bool abandonTransaction(uint256 hash) const;
 
+    struct NameNewReturn
+    {
+        bool ok;
+        std::string err_msg;
+        std::string toaddress;
+        std::string hex;
+        std::string rand;
+        std::string data;
+    };
+
+    bool nameAvailable(const QString &name, QString *reason=nullptr);
+    WalletModel::NameNewReturn nameNew(const QString &name);
+    std::vector<std::string> sendPendingNameFirstUpdates();
+    const std::string completePendingNameFirstUpdate(const std::string &name, const std::string &rand, const std::string &txid, const std::string &data, const std::string &toaddress);
+    QString nameUpdate(const QString &name, const QString &data, const QString &transferToAddress);
+    bool writePendingNameFirstUpdate(const std::string &name, const std::string &rand, const std::string &txid, const std::string &data, const std::string &toaddress);
+    bool pendingNameFirstUpdateExists(const std::string &name) const;
+    bool getPendingNameFirstUpdate(const std::string &name, CNamePendingData *data=nullptr) const;
+
     bool transactionCanBeBumped(uint256 hash) const;
     bool bumpFee(uint256 hash);
 
@@ -231,6 +253,7 @@ private:
 
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
+    NameTableModel *nameTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
 
     // Cache some values to be able to detect changes

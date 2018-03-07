@@ -4221,6 +4221,50 @@ bool CWallet::BackupWallet(const std::string& strDest)
     return dbw->Backup(strDest);
 }
 
+bool CWallet::PendingNameFirstUpdateExists(const std::string &name)
+{
+    LOCK(cs_wallet);
+    return namePendingMap.end() != namePendingMap.find(name);
+}
+
+bool CWallet::WritePendingNameFirstUpdate(const std::string &name, const std::string &rand, const std::string &txid, const std::string &data, const std::string &toaddress)
+{
+    LOCK(cs_wallet);
+    CNamePendingData nameData;
+    nameData.setHex(txid);
+    nameData.setRand(rand);
+    nameData.setData(data);
+    if(!toaddress.empty())
+        nameData.setToAddress(toaddress);
+
+    bool success = CWalletDB(*dbw).WriteNameFirstUpdate(name, nameData);
+    if(success)
+        namePendingMap[name] = nameData;
+
+    return success;
+}
+
+bool CWallet::ErasePendingNameFirstUpdate(const std::string &name)
+{
+    LOCK(cs_wallet);
+    bool success = CWalletDB(*dbw).EraseNameFirstUpdate(name);
+    if(success)
+        namePendingMap.erase(name);
+    return success;
+}
+
+bool CWallet::GetPendingNameFirstUpdate(const std::string &name, CNamePendingData *data)
+{
+    LOCK(cs_wallet);
+    std::map<std::string, CNamePendingData> pn = namePendingMap;
+    std::map<std::string, CNamePendingData>::iterator it = pn.find(name);
+    if (it == pn.end())
+        return false;
+    if (data)
+        (*data) = it->second;
+    return true;
+}
+
 CKeyPool::CKeyPool()
 {
     nTime = GetTime();

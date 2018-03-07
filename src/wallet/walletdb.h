@@ -7,6 +7,7 @@
 #define BITCOIN_WALLET_WALLETDB_H
 
 #include <amount.h>
+#include <names/common.h>
 #include <primitives/transaction.h>
 #include <wallet/db.h>
 #include <key.h>
@@ -212,6 +213,9 @@ public:
 
     CAmount GetAccountCreditDebit(const std::string& strAccount);
     void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& acentries);
+
+    bool WriteNameFirstUpdate(const std::string& name, const CNamePendingData& data);
+    bool EraseNameFirstUpdate(const std::string& name);
 
     DBErrors LoadWallet(CWallet* pwallet);
     DBErrors FindWalletTx(std::vector<uint256>& vTxHash, std::vector<CWalletTx>& vWtx);

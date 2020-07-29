@@ -4352,6 +4352,7 @@ extern UniValue name_new(const JSONRPCRequest& request);
 extern UniValue name_firstupdate(const JSONRPCRequest& request);
 extern UniValue name_update(const JSONRPCRequest& request);
 extern UniValue queuerawtransaction (const JSONRPCRequest& request);
+extern UniValue listqueuedtransactions (const JSONRPCRequest& request);
 extern UniValue sendtoname(const JSONRPCRequest& request);
 
 Span<const CRPCCommand> GetWalletRPCCommands()
@@ -4428,6 +4429,7 @@ static const CRPCCommand commands[] =
     { "names",              "name_firstupdate",                 &name_firstupdate,              {"name","rand","tx","value","options","allow_active"} },
     { "names",              "name_update",                      &name_update,                   {"name","value","options"} },
     { "names",              "queuerawtransaction",              &queuerawtransaction,           {"hexstring","options"} },
+    { "names",              "listqueuedtransactions",           &listqueuedtransactions,        {} },
     { "names",              "sendtoname",                       &sendtoname,                    {"name","amount","comment","comment_to","subtractfeefromamount"} },
 };
 // clang-format on

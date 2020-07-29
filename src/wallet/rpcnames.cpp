@@ -27,6 +27,7 @@
 #include <util/moneystr.h>
 #include <util/system.h>
 #include <util/translation.h>
+#include <util/vector.h>
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/rpcwallet.h>
@@ -746,6 +747,85 @@ queuerawtransaction (const JSONRPCRequest& request)
   }
 
   return hashTx.GetHex();
+}
+
+/* ************************************************************************** */
+
+UniValue
+listqueuedtransactions (const JSONRPCRequest& request)
+{
+  RPCHelpMan{"listqueuedtransactions",
+      "\nList the transactions that are queued for future broadcast.\n",
+      {
+      },
+      RPCResult{
+          RPCResult::Type::OBJ_DYN, "", "JSON object with transaction ID's as keys",
+          {
+              {RPCResult::Type::OBJ, "", "",
+              {
+                  {RPCResult::Type::STR_HEX, "transaction", "The hex string of the raw transaction."},
+                  {RPCResult::Type::OBJ, "sendWhen", "Conditions upon which the transaction will be broadcast.",
+                  {
+                      {RPCResult::Type::STR_HEX, "txid", "Transaction ID to watch for confirmation."},
+                      {RPCResult::Type::STR, "name", "Name to watch for confirmation (most recent update)."},
+                      {RPCResult::Type::NUM, "confirmations", "Queued transaction will be broadcast when the txid or name has this many confirmations."},
+                  }},
+              }},
+          }
+      },
+      RPCExamples{
+          HelpExampleCli("listqueuedtransactions", "") +
+          HelpExampleRpc("listqueuedtransactions", "")
+      },
+  }.Check(request);
+
+  std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest (request);
+  if (!wallet) return NullUniValue;
+  CWallet* const pwallet = wallet.get ();
+
+  if (request.fHelp || request.params.size () > 0)
+    throw std::runtime_error (
+        "listqueuedtransactions\n"
+        "\nList the transactions that are queued for future broadcast.\n"
+      );
+
+  LOCK2 (cs_main, pwallet->cs_wallet);
+
+  UniValue result(UniValue::VOBJ);
+
+  for (const auto& i : wallet->queuedTransactionMap)
+  {
+    const auto& npd = i.second;
+    const std::string& txidHex = i.first;
+    const uint256& triggerTxid = npd.getTriggerTxid();
+    const valtype& triggerName = npd.getTriggerName();
+    int32_t triggerDepth = npd.getTriggerDepth();
+    const valtype& tx = npd.getTx();
+
+    const std::string triggerTxidStr = triggerTxid.GetHex();
+    const std::string triggerNameStr = EncodeName (triggerName, ConfiguredNameEncoding ());
+    const std::string txStr = EncodeName (tx, NameEncoding::HEX);
+
+    UniValue sendWhen(UniValue::VOBJ);
+    if (triggerTxid.IsNull())
+    {
+        sendWhen.pushKV("txid", NullUniValue);
+    }
+    else {
+        sendWhen.pushKV("txid", triggerTxidStr);
+    }
+    // TODO: Return NullUniValue if trigger name isn't set
+    sendWhen.pushKV("name", triggerNameStr);
+    sendWhen.pushKV("confirmations", triggerDepth);
+
+    UniValue entry(UniValue::VOBJ);
+    entry.pushKV("sendWhen", sendWhen);
+    entry.pushKV("transaction", txStr);
+
+    result.pushKV(txidHex, entry);
+  }
+
+  return result;
 }
 
 /* ************************************************************************** */

@@ -38,6 +38,9 @@ private:
     WalletModel *walletModel;
     QSortFilterProxyModel *proxyModel;
     QMenu *contextMenu;
+    QAction *copyNameAction;
+    QAction *copyValueAction;
+    QAction *renewNameAction;
 
 public Q_SLOTS:
     void exportClicked();
@@ -51,6 +54,7 @@ private Q_SLOTS:
 
     void onCopyNameAction();
     void onCopyValueAction();
+    void onRenewNameAction();
 };
 
 #endif // MANAGENAMESPAGE_H

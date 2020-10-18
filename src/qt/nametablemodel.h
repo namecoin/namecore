@@ -49,6 +49,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const;
     /*@}*/
 
+    QString renew(const QString &name) const;
+
 private:
     WalletModel *walletModel;
     std::unique_ptr<interfaces::Handler> m_handler_transaction_changed;

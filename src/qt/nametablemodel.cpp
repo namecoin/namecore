@@ -270,3 +270,26 @@ NameTableModel::emitDataChanged(int idx)
     //emit
     dataChanged(index(idx, 0), index(idx, columns.length()-1));
 }
+
+QString NameTableModel::renew(const QString &name) const
+{
+    std::string strName = name.toStdString();
+    LogPrintf ("wallet attempting name_update: name=%s\n", strName);
+
+    UniValue params(UniValue::VOBJ);
+    params.pushKV ("name", strName);
+
+    std::string walletURI = ("/wallet/" + walletModel->getWalletName()).toStdString();
+
+    UniValue res;
+    try {
+       res = walletModel->node().executeRpc("name_update", params, walletURI);
+    }
+    catch (const UniValue& e) {
+        UniValue message = find_value( e, "message");
+        std::string errorStr = message.get_str();
+        LogPrintf ("name_update error: %s\n", errorStr);
+        return QString::fromStdString(errorStr);
+    }
+    return tr ("");
+}

@@ -174,9 +174,9 @@ to the network and creates a pending name_firstupdate transaction.</string>
         </attribute>
        </widget>
       </item>
-      <!--
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <!--
         <item>
          <widget class="QPushButton" name="configureNameButton">
           <property name="sizePolicy">
@@ -202,6 +202,7 @@ to the network and creates a pending name_firstupdate transaction.</string>
           </property>
          </widget>
         </item>
+        -->
         <item>
          <widget class="QPushButton" name="renewNameButton">
           <property name="sizePolicy">
@@ -217,10 +218,10 @@ to the network and creates a pending name_firstupdate transaction.</string>
            </size>
           </property>
           <property name="toolTip">
-           <string>Renew the name with its current value</string>
+           <string>Renew the names with their current values</string>
           </property>
           <property name="text">
-           <string>&amp;Renew Name</string>
+           <string>&amp;Renew Names</string>
           </property>
           <property name="default">
            <bool>false</bool>
@@ -229,7 +230,6 @@ to the network and creates a pending name_firstupdate transaction.</string>
         </item>
        </layout>
       </item>
-      -->
      </layout>
     </widget>
    </item>

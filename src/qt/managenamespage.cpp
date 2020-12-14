@@ -37,6 +37,8 @@ ManageNamesPage::ManageNamesPage(const PlatformStyle *platformStyle, QWidget *pa
     connect(copyValueAction, &QAction::triggered, this, &ManageNamesPage::onCopyValueAction);
     connect(renewNameAction, &QAction::triggered, this, &ManageNamesPage::onRenewNameAction);
 
+    connect(ui->renewNameButton, &QPushButton::clicked, this, &ManageNamesPage::onRenewNameAction);
+
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &ManageNamesPage::contextualMenu);
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -96,6 +98,9 @@ void ManageNamesPage::selectionChanged()
     copyNameAction->setEnabled(singleNameSelected);
     copyValueAction->setEnabled(singleNameSelected);
     renewNameAction->setEnabled(anyNamesSelected);
+
+    // Buttons
+    ui->renewNameButton->setEnabled(anyNamesSelected);
 }
 
 void ManageNamesPage::contextualMenu(const QPoint &point)

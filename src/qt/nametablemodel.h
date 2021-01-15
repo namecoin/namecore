@@ -49,6 +49,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const;
     /*@}*/
 
+    QString update(const QString &name, const QString *value, const QString &transferTo) const;
     QString renew(const QString &name) const;
 
 private:

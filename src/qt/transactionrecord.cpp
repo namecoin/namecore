@@ -7,6 +7,8 @@
 #include <chain.h>
 #include <interfaces/wallet.h>
 #include <key_io.h>
+#include <names/encoding.h>
+#include <script/names.h>
 #include <wallet/ismine.h>
 
 #include <stdint.h>
@@ -99,7 +101,44 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
             }
 
             CAmount nChange = wtx.change;
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::SendToSelf, address, -(nDebit - nChange), nCredit - nChange));
+
+            // If we find a name script, we put it here.
+            bool foundNameOp = false;
+            CNameScript nameScript;
+
+            // TODO: Maybe move this loop into a convenience function.
+            for (const CTxOut& txout : wtx.tx->vout)
+            {
+                // check txout for nameop
+                const CNameScript maybeNameScript(txout.scriptPubKey);
+                if(maybeNameScript.isNameOp())
+                {
+                    foundNameOp = true;
+                    nameScript = maybeNameScript;
+
+                    break;
+                }
+            }
+
+            if(foundNameOp)
+            {
+                // TODO: Use "Pre-Registration" / "Registration" / "Update" strings
+                std::string opName = GetOpName(nameScript.getNameOp());
+                std::string description = opName.substr(3);
+
+                // TODO: Use friendly names based on namespaces
+                if(nameScript.isAnyUpdate())
+                {
+                    description += " " + EncodeNameForMessage(nameScript.getOpName());
+                }
+
+                parts.append(TransactionRecord(hash, nTime, TransactionRecord::NameOp, description, -(nDebit - nChange), nCredit - nChange));
+            }
+            else
+            {
+                parts.append(TransactionRecord(hash, nTime, TransactionRecord::SendToSelf, address, -(nDebit - nChange), nCredit - nChange));
+            }
+
             parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
         }
         else if (fAllFromMe)

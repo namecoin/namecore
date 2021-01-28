@@ -98,7 +98,21 @@ public:
                 std::string data = maybeData.get_str();
                 int height = find_value ( v, "height").get_int();
                 int expiresIn = find_value ( v, "expires_in").get_int();
-                vNamesO[name] = NameTableEntry(name, data, height, expiresIn, "confirmed");
+
+                bool isMine = find_value ( v, "ismine").get_bool();
+                bool isExpired = find_value ( v, "expired").get_bool();
+
+                std::string status = "Confirmed";
+                if (isExpired)
+                {
+                    status = "Expired";
+                }
+                if (!isMine)
+                {
+                    status = "Transferred out";
+                }
+
+                vNamesO[name] = NameTableEntry(name, data, height, expiresIn, status);
             }
         }
 

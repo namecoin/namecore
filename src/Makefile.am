@@ -157,6 +157,7 @@ BITCOIN_CORE_H = \
   memusage.h \
   merkleblock.h \
   miner.h \
+  names/applications.h \
   names/common.h \
   names/encoding.h \
   names/main.h \
@@ -513,6 +514,7 @@ libbitcoin_common_a_SOURCES = \
   key.cpp \
   key_io.cpp \
   merkleblock.cpp \
+  names/applications.cpp \
   names/common.cpp \
   names/encoding.cpp \
   netaddress.cpp \

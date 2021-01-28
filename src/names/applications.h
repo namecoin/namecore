@@ -1,9 +1,11 @@
-// Copyright (c) 2018 Daniel Kraft
+// Copyright (c) 2021 Jeremy Rand
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef H_BITCOIN_NAMES_ENCODING
-#define H_BITCOIN_NAMES_ENCODING
+#ifndef H_BITCOIN_NAMES_APPLICATIONS
+#define H_BITCOIN_NAMES_APPLICATIONS
+
+// TODO: remove some of these includes if they're not needed
 
 #include <script/script.h>
 
@@ -11,6 +13,15 @@
 #include <string>
 
 class UniValue;
+
+enum class NameNamespace
+{
+    Domain,
+    DomainData,
+    Identity,
+    IdentityData,
+    NonStandard,
+}
 
 /**
  * Enum for the possible encodings of names/values in the RPC interface.
@@ -45,8 +56,6 @@ static constexpr NameEncoding DEFAULT_VALUE_ENCODING = NameEncoding::ASCII;
    std::invalid_argument if the conversion fails.  */
 NameEncoding EncodingFromString (const std::string& str);
 std::string EncodingToString (NameEncoding enc);
-
-bool IsStringValid (const std::string& str, const NameEncoding enc);
 
 /**
  * Exception that is thrown if a name/value string is invalid according
@@ -92,4 +101,4 @@ std::string EncodeNameForMessage (const valtype& data);
 void AddEncodedNameToUniv (UniValue& obj, const std::string& key,
                            const valtype& data, NameEncoding enc);
 
-#endif // H_BITCOIN_NAMES_ENCODING
+#endif // H_BITCOIN_NAMES_APPLICATIONS

@@ -80,9 +80,6 @@ EncodingToString (NameEncoding enc)
   assert (false);
 }
 
-namespace
-{
-
 bool
 IsStringValid (const std::string& str, const NameEncoding enc)
 {
@@ -105,6 +102,9 @@ IsStringValid (const std::string& str, const NameEncoding enc)
 
   assert (false);
 }
+
+namespace
+{
 
 void
 VerifyStringValid (const std::string& str, const NameEncoding enc)

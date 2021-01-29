@@ -101,6 +101,7 @@ public:
 
                 bool isMine = find_value ( v, "ismine").get_bool();
                 bool isExpired = find_value ( v, "expired").get_bool();
+                // TODO: Check "op" field
 
                 std::string status = "Confirmed";
                 if (isExpired)
@@ -110,6 +111,125 @@ public:
                 if (!isMine)
                 {
                     status = "Transferred out";
+                }
+
+                vNamesO[name] = NameTableEntry(name, data, height, expiresIn, status);
+            }
+        }
+
+        UniValue pendingNames;
+        try {
+            pendingNames = parent.walletModel->node().executeRpc("name_pending", NullUniValue, walletURI);
+        } catch (const UniValue& e) {
+            // although we shouldn't typically encounter error here, we
+            // should continue and try to add confirmed names and
+            // pending names. show error to user in case something
+            // actually went wrong so they can potentially recover
+            UniValue message = find_value( e, "message");
+            LogPrintf ("name_pending lookup error: %s\n", message.get_str());
+        }
+
+        // will be an object if name_pending command isn't available/other error
+        if(pendingNames.isArray())
+        {
+            for (const auto& v : pendingNames.getValues())
+            {
+                UniValue maybeName = find_value ( v, "name");
+                UniValue maybeData = find_value ( v, "value");
+                if (!maybeName.isStr() || !maybeData.isStr())
+                {
+                    continue;
+                }
+
+                std::string name = maybeName.get_str();
+                std::string data = maybeData.get_str();
+
+                bool isMine = find_value ( v, "ismine").get_bool();
+                std::string op = find_value ( v, "op").get_str();
+
+                auto confirmedEntryExists = vNamesO.count(name);
+
+                int height = 0;
+                int expiresIn = 0;
+                std::string status;
+
+                if (!confirmedEntryExists)
+                {
+                    if (!isMine)
+                    {
+                        // This name isn't ours, it's just some random name
+                        // that another user has pending.
+                        continue;
+                    }
+
+                    // The name will be ours when it confirms, but it wasn't
+                    // ours before.
+
+                    if (op == "name_firstupdate")
+                    {
+                        // This is a registration, so the reason it wasn't ours
+                        // before is that we hadn't registered it yet.
+                        status = "Registration pending";
+                    }
+                    else if (op == "name_update")
+                    {
+                        // This is an update, so we weren't the one to register
+                        // it.  (If we were, there would be a confirmed entry.)
+                        // So this is an incoming transfer.
+                        status = "Incoming transfer pending";
+                    }
+                }
+                else
+                {
+                    // A confirmed entry exists.
+                    auto confirmedEntry = vNamesO[name];
+                    QString confirmedStatus = confirmedEntry.nameStatus;
+                    height = confirmedEntry.nHeight;
+                    expiresIn = confirmedEntry.expiresIn;
+
+                    if (confirmedStatus == "Expired" || confirmedStatus == "Transferred out")
+                    {
+                        if (!isMine)
+                        {
+                            // This name isn't ours, it's just some random name
+                            // that another user has pending.
+                            continue;
+                        }
+
+                        // The name will be ours when it confirms, but it
+                        // wasn't ours before.
+
+                        if (op == "name_firstupdate")
+                        {
+                            // This is a registration, so the reason it wasn't
+                            // ours before is that we hadn't registered it yet.
+                            status = "Registration pending";
+                        }
+                        else if (op == "name_update")
+                        {
+                            // This is an update, so we weren't the one to
+                            // register it.  (If we were, there would be a
+                            // confirmed entry.)  So this is an incoming
+                            // transfer.
+                            status = "Incoming transfer pending";
+                        }
+                    }
+                    else if (confirmedStatus == "Confirmed")
+                    {
+                        if (!isMine)
+                        {
+                            // This name was ours, but won't be after this
+                            // transaction confirms.  So this is an outgoing
+                            // transfer.
+                            status = "Outgoing transfer pending";
+                        }
+                        else
+                        {
+                            // This name was ours, and still will be.  So this
+                            // is a pending update.
+                            status = "Update pending";
+                        }
+                    }                    
                 }
 
                 vNamesO[name] = NameTableEntry(name, data, height, expiresIn, status);

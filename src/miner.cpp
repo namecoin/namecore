@@ -255,6 +255,7 @@ BlockAssembler::TxAllowedForNamecoin (const CTransaction& tx) const
   if (nameOutFound && nameOpOut.getNameOp () == OP_NAME_FIRSTUPDATE)
     {
       bool nameNewFound = false;
+      LOCK (cs_main);
       const auto& coinsTip = ::ChainstateActive ().CoinsTip ();
       for (const auto& txIn : tx.vin)
         {

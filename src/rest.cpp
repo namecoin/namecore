@@ -741,6 +741,7 @@ static bool rest_name(const std::any& context, HTTPRequest* req, const std::stri
         return RESTERR(req, HTTP_BAD_REQUEST,
                        "Invalid encoded name: " + encodedName);
 
+    LOCK (cs_main);
     CNameData data;
     if (!::ChainstateActive ().CoinsTip ().GetName(plainName, data))
         return RESTERR(req, HTTP_NOT_FOUND,

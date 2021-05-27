@@ -8,6 +8,7 @@
 #include <names/common.h>
 #include <primitives/transaction.h>
 #include <uint256.h>
+#include <sync.h>
 
 #include <map>
 #include <memory>

@@ -36,7 +36,7 @@ namespace
  * there is any.  The txid must be for an entry in the mempool.
  */
 COutPoint
-getNameOutput (const CTxMemPool& pool, const uint256& txid)
+getNameOutput (const CTxMemPool& pool, const uint256& txid) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -57,7 +57,7 @@ getNameOutput (const CTxMemPool& pool, const uint256& txid)
 } // anonymous namespace
 
 COutPoint
-CNameMemPool::lastNameOutput (const valtype& name) const
+CNameMemPool::lastNameOutput (const valtype& name) const EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   const auto itUpd = updates.find (name);
   if (itUpd != updates.end ())
@@ -102,7 +102,7 @@ CNameMemPool::lastNameOutput (const valtype& name) const
 }
 
 void
-CNameMemPool::addUnchecked (const CTxMemPoolEntry& entry)
+CNameMemPool::addUnchecked (const CTxMemPoolEntry& entry) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -137,7 +137,7 @@ CNameMemPool::addUnchecked (const CTxMemPoolEntry& entry)
 }
 
 void
-CNameMemPool::remove (const CTxMemPoolEntry& entry)
+CNameMemPool::remove (const CTxMemPoolEntry& entry) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -162,7 +162,7 @@ CNameMemPool::remove (const CTxMemPoolEntry& entry)
 }
 
 void
-CNameMemPool::removeConflicts (const CTransaction& tx)
+CNameMemPool::removeConflicts (const CTransaction& tx) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -188,7 +188,7 @@ CNameMemPool::removeConflicts (const CTransaction& tx)
 }
 
 void
-CNameMemPool::removeUnexpireConflicts (const std::set<valtype>& unexpired)
+CNameMemPool::removeUnexpireConflicts (const std::set<valtype>& unexpired) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -209,7 +209,7 @@ CNameMemPool::removeUnexpireConflicts (const std::set<valtype>& unexpired)
 }
 
 void
-CNameMemPool::removeExpireConflicts (const std::set<valtype>& expired)
+CNameMemPool::removeExpireConflicts (const std::set<valtype>& expired) EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 
@@ -238,7 +238,7 @@ CNameMemPool::removeExpireConflicts (const std::set<valtype>& expired)
 }
 
 void
-CNameMemPool::check (ChainstateManager& chainman, CChainState& active_chainstate) const
+CNameMemPool::check (ChainstateManager& chainman, CChainState& active_chainstate) const EXCLUSIVE_LOCKS_REQUIRED (pool.cs, cs_main)
 {
   AssertLockHeld (pool.cs);
 
@@ -309,7 +309,7 @@ CNameMemPool::check (ChainstateManager& chainman, CChainState& active_chainstate
 }
 
 bool
-CNameMemPool::checkTx (const CTransaction& tx) const
+CNameMemPool::checkTx (const CTransaction& tx) const EXCLUSIVE_LOCKS_REQUIRED (pool.cs)
 {
   AssertLockHeld (pool.cs);
 

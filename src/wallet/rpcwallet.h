@@ -14,7 +14,6 @@
 #include <vector>
 
 class CCoinControl;
-class CRecipient;
 class CRPCCommand;
 class CWallet;
 class CWalletTx;
@@ -22,6 +21,7 @@ class JSONRPCRequest;
 class LegacyScriptPubKeyMan;
 class UniValue;
 class CTransaction;
+struct CRecipient;
 struct PartiallySignedTransaction;
 struct WalletContext;
 

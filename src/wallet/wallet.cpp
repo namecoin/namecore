@@ -57,6 +57,7 @@ const std::map<uint64_t,std::string> WALLET_FLAG_CAVEATS{
 
 static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
 
+RecursiveMutex cs_wallet;
 RecursiveMutex cs_wallets;
 static std::vector<std::shared_ptr<CWallet>> vpwallets GUARDED_BY(cs_wallets);
 static std::list<LoadWalletFn> g_load_wallet_fns GUARDED_BY(cs_wallets);
@@ -1977,7 +1978,7 @@ CAmount CWalletTx::GetCachableAmount(AmountType type, const isminefilter& filter
     return amount.m_value[filter];
 }
 
-CAmount CWalletTx::GetDebit(const isminefilter& filter) const
+CAmount CWalletTx::GetDebit(const isminefilter& filter) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet)
 {
     if (tx->vin.empty())
         return 0;
@@ -2742,7 +2743,7 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, int& nC
 bool
 CWallet::FindValueInNameInput (const CTxIn& nameInput,
                                CAmount& value, const CWalletTx*& walletTx,
-                               bilingual_str& error) const
+                               bilingual_str& error) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet)
 {
   walletTx = GetWalletTx (nameInput.prevout.hash);
   if (!walletTx)
@@ -2903,6 +2904,7 @@ bool CWallet::CreateTransactionInternal(
        additionally to the selected coins.  */
     CAmount nInputValue = 0;
     const CWalletTx* withInputTx = nullptr;
+    LOCK(cs_wallet);
     if (withInput)
     {
         if (!FindValueInNameInput (*withInput, nInputValue, withInputTx, error))
@@ -2919,7 +2921,6 @@ bool CWallet::CreateTransactionInternal(
     int nBytes;
     {
         std::set<CInputCoin> setCoins;
-        LOCK(cs_wallet);
         txNew.nLockTime = GetLocktimeForNewTransaction(chain(), GetLastBlockHash(), GetLastBlockHeight());
         {
             std::vector<COutput> vAvailableCoins;

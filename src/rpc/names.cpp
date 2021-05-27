@@ -136,7 +136,7 @@ addExpirationInfo (const ChainstateManager& chainman,
  */
 void
 addOwnershipInfo (const CScript& addr, const CWallet* pwallet,
-                  UniValue& data)
+                  UniValue& data) EXCLUSIVE_LOCKS_REQUIRED(pwallet->cs_wallet)
 {
   if (pwallet == nullptr)
     return;
@@ -311,9 +311,11 @@ public:
  */
 void
 addOwnershipInfo (const CScript& addr, const MaybeWalletForRequest& wallet,
-                  UniValue& data)
+                  UniValue& data) EXCLUSIVE_LOCKS_REQUIRED(wallet.getLock())
 {
 #ifdef ENABLE_WALLET
+  LOCK (wallet.getWallet()->cs_wallet); // This is unneccessary, but the type analyzer can't conclude wallet.getLock() == wallet.getWallet()->cs_wallet
+  //LOCK (wallet.getLock()); // This is unneccessary, but the type analyzer can't conclude wallet.getLock() == wallet.getWallet()->cs_wallet
   addOwnershipInfo (addr, wallet.getWallet (), data);
 #endif
 }
@@ -325,7 +327,7 @@ addOwnershipInfo (const CScript& addr, const MaybeWalletForRequest& wallet,
 UniValue
 getNameInfo (const ChainstateManager& chainman, const UniValue& options,
              const valtype& name, const CNameData& data,
-             const MaybeWalletForRequest& wallet)
+             const MaybeWalletForRequest& wallet) EXCLUSIVE_LOCKS_REQUIRED(wallet.getLock())
 {
   UniValue res = getNameInfo (chainman, options, name, data);
   addOwnershipInfo (data.getAddress (), wallet, res);

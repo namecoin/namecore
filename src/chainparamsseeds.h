@@ -43,5 +43,6 @@ static const uint8_t chainparams_seed_main[] = {
 };
 
 static const uint8_t chainparams_seed_test[] = {
+    0x01,0x04,0x00,0x00,0x00,0x00,0x20,0x8e,
 };
 #endif // BITCOIN_CHAINPARAMSSEEDS_H

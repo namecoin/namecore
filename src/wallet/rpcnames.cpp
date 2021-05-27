@@ -318,7 +318,7 @@ namespace
  * @return True on success, false otherwise
  */
 bool
-getNameSalt(CWallet* const pwallet, const valtype& name, const CScript& output, valtype& rand)
+getNameSalt(CWallet* const pwallet, const valtype& name, const CScript& output, valtype& rand) EXCLUSIVE_LOCKS_REQUIRED(pwallet->cs_wallet)
 {
     AssertLockHeld(pwallet->cs_wallet);
 
@@ -467,7 +467,7 @@ namespace
  * @return True if the output could be found.
  */
 bool
-getNamePrevout (const uint256& txid, CTxOut& txOut, CTxIn& txIn)
+getNamePrevout (const uint256& txid, CTxOut& txOut, CTxIn& txIn) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
   AssertLockHeld (cs_main);
 
@@ -871,7 +871,7 @@ sendtoname ()
      the user could have gotten from another RPC command prior to now.  */
   pwallet->BlockUntilSyncedToCurrentChain();
 
-  LOCK(pwallet->cs_wallet);
+  LOCK2 (pwallet->cs_wallet, cs_main);
 
   /* sendtoname does not support an options argument (e.g. to override the
      configured name/value encodings).  That would just add to the already

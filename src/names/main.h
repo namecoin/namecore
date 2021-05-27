@@ -9,6 +9,7 @@
 #include <names/common.h>
 #include <primitives/transaction.h>
 #include <serialize.h>
+#include <sync.h>
 
 #include <set>
 
@@ -18,6 +19,8 @@ class CCoinsViewCache;
 class ChainstateManager;
 class CTxMemPool;
 class TxValidationState;
+
+extern RecursiveMutex cs_main;
 
 /* Some constants defining name limits.  */
 constexpr unsigned MAX_VALUE_LENGTH = 1023;
@@ -105,7 +108,7 @@ void ApplyNameTransaction (const CTransaction& tx, unsigned nHeight,
 /**
  * Expire all names at the given height.  This removes their coins
  * from the UTXO set.
- * @param height The new block height.
+ * @param nHeight The new block height.
  * @param view The coins view to update.
  * @param undo The block undo object to record undo information.
  * @param names List all expired names here.
@@ -132,6 +135,6 @@ bool UnexpireNames (unsigned nHeight, CBlockUndo& undo,
  * this throws an assertion failure.
  * @param disconnect Whether we are disconnecting blocks.
  */
-void CheckNameDB (ChainstateManager& chainman, bool disconnect);
+void CheckNameDB (ChainstateManager& chainman, bool disconnect) EXCLUSIVE_LOCKS_REQUIRED (cs_main);
 
 #endif // H_BITCOIN_NAMES_MAIN

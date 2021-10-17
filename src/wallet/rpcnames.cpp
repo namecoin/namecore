@@ -1087,12 +1087,12 @@ name_update ()
     {
       LOCK (cs_main);
 
-      CNameData oldData;
-      const auto& coinsTip = chainman.ActiveChainstate ().CoinsTip ();
-      if (!coinsTip.GetName (name, oldData)
-            || oldData.isExpired (chainman.ActiveHeight ()))
+      if (!existsName (name, chainman))
         throw JSONRPCError (RPC_TRANSACTION_ERROR,
                             "this name can not be updated");
+      CNameData oldData;
+      const auto& coinsTip = chainman.ActiveChainstate ().CoinsTip ();
+      coinsTip.GetName (name, oldData);
       if (isDefaultVal)
         value = oldData.getValue();
       outp = oldData.getUpdateOutpoint ();

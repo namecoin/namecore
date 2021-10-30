@@ -5081,6 +5081,7 @@ RPCHelpMan importdescriptors();
 RPCHelpMan listdescriptors();
 
 extern RPCHelpMan name_list(); // in rpcnames.cpp
+extern RPCHelpMan name_autoregister();
 extern RPCHelpMan name_new();
 extern RPCHelpMan name_firstupdate();
 extern RPCHelpMan name_update();
@@ -5167,6 +5168,7 @@ static const CRPCCommand commands[] =
 
     // Name-related wallet calls.
     { "names",              &name_list,                      },
+    { "names",              &name_autoregister,              },
     { "names",              &name_new,                       },
     { "names",              &name_firstupdate,               },
     { "names",              &name_update,                    },

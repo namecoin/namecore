@@ -2025,19 +2025,17 @@ static ThresholdConditionCache warningcache[VERSIONBITS_NUM_BITS] GUARDED_BY(cs_
 
 static unsigned int GetBlockScriptFlags(const CBlockIndex& block_index, const Consensus::Params& consensusparams)
 {
-    uint32_t flags{SCRIPT_VERIFY_NONE};
+    /* For simplicity, we enforce P2SH+Segwit for all previous blocks (before
+       the actual activation) as well.  They all are valid with these extra
+       checks turned on.  */
+    uint32_t flags{SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS};
 
     /* We allow overriding flags with exceptions, in case a few historical
        blocks violate a softfork that got activated later, and which we want
-       to otherwise enforce unconditionally.  For now, there are no
-       flags enforced unconditionally, though.  */
+       to otherwise enforce unconditionally.  */
     const auto it{consensusparams.script_flag_exceptions.find(*Assert(block_index.phashBlock))};
     if (it != consensusparams.script_flag_exceptions.end()) {
         flags = it->second;
-    }
-
-    if (DeploymentActiveAt(block_index, consensusparams, Consensus::DEPLOYMENT_P2SH)) {
-        flags |= SCRIPT_VERIFY_P2SH;
     }
 
     // Enforce the DERSIG (BIP66) rule
@@ -2064,7 +2062,6 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex& block_index, const Co
     // Enforce BIP147 NULLDUMMY (activated simultaneously with segwit)
     if (DeploymentActiveAt(block_index, consensusparams, Consensus::DEPLOYMENT_SEGWIT)) {
         flags |= SCRIPT_VERIFY_NULLDUMMY;
-        flags |= SCRIPT_VERIFY_WITNESS;
     }
 
     return flags;

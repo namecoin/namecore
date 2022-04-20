@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2014-2021 Daniel Kraft
+# Copyright (c) 2014-2022 Daniel Kraft
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,8 +28,6 @@ from test_framework.util import (
 from decimal import Decimal
 import io
 
-SEGWIT_ACTIVATION_HEIGHT = 300
-
 
 class NameSegwitTest (NameTestFramework):
 
@@ -37,7 +35,6 @@ class NameSegwitTest (NameTestFramework):
     self.setup_name_test ([[
       "-debug",
       "-par=1",
-      f"-testactivationheight=segwit@{SEGWIT_ACTIVATION_HEIGHT}"
     ]] * 1)
 
   def checkNameValueAddr (self, name, value, addr):
@@ -133,34 +130,12 @@ class NameSegwitTest (NameTestFramework):
     self.generate (self.node, 5)
     self.checkNameValueAddr (name, value, addr)
 
-    # Before segwit activation, the script should behave as anyone-can-spend.
-    # It will still fail due to non-mandatory flag checks when submitted
-    # into the mempool.
-    assert not softfork_active (self.node, "segwit")
+    # Verify that trying to update the name without a proper signature
+    # fails both directly in a block and through sendrawtransaction.
     assert_raises_rpc_error (-26, 'Script failed an OP_EQUALVERIFY operation',
                              self.tryUpdateSegwitName,
                              name, "wrong value", addr)
     self.generate (self.node, 1)
-    self.checkNameValueAddr (name, value, addr)
-
-    # But directly in a block, the update should work with a dummy witness.
-    assert_equal (self.tryUpdateInBlock (name, "stolen", addr,
-                                         withWitness=False),
-                  None)
-    self.checkNameValueAddr (name, "stolen", addr)
-
-    # Activate segwit.  Since this makes the original name expire, we have
-    # to re-register it.
-    self.generate (self.node, 100)
-    new = self.node.name_new (name)
-    self.generate (self.node, 10)
-    self.firstupdateName (0, name, new, value, {"destAddress": addr})
-    self.generate (self.node, 5)
-    self.checkNameValueAddr (name, value, addr)
-
-    # Verify that now trying to update the name without a proper signature
-    # fails differently.
-    assert softfork_active (self.node, "segwit")
     assert_equal (self.tryUpdateInBlock (name, "wrong value", addr,
                                          withWitness=True),
                   'non-mandatory-script-verify-flag'

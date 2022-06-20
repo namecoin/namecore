@@ -4,6 +4,7 @@
 #include <qt/platformstyle.h>
 
 #include <QWidget>
+#include <optional>
 
 class WalletModel;
 

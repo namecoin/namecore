@@ -8,10 +8,15 @@
 #include <consensus/amount.h>
 #include <hash.h>
 #include <script/names.h>
+#include <script/script.h>
+#include <serialize.h>
 #include <tinyformat.h>
+#include <uint256.h>
 #include <util/strencodings.h>
+#include <version.h>
 
-#include <assert.h>
+#include <cassert>
+#include <stdexcept>
 
 std::string COutPoint::ToString() const
 {

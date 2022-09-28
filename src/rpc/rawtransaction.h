@@ -9,6 +9,6 @@ class CTransaction;
 class UniValue;
 class uint256;
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, CChainState& active_chainstate);
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, Chainstate& active_chainstate);
 
 #endif // BITCOIN_RPC_RAWTRANSACTION_H

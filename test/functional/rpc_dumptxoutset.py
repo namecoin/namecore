@@ -37,21 +37,25 @@ class DumptxoutsetTest(BitcoinTestFramework):
         # Blockhash should be deterministic based on mocked time.
         assert_equal(
             out['base_hash'],
-            'cd4a86930f745733bb164e22c1e94fe5d83fdf0f156861789d1d0b9ca094df89')
+            'ef4526133e4eaa9ee88b2e5c3fd49a6dd1cb6a282b49dc6d8ea6334786eeb829')
 
         with open(str(expected_path), 'rb') as f:
             digest = hashlib.sha256(f.read()).hexdigest()
             # UTXO snapshot hash should be deterministic based on mocked time.
             assert_equal(
-                digest, 'd886c013424222428db1ff66b7d0fe0289de55bde085a469b3e12b653add6c71')
+                digest, '69edbefdd3e951378cc480652d1a3092789aa6cc92435f415fd0c48ccda6646f')
 
         assert_equal(
-            out['txoutset_hash'], '24078500c82415b256fc24a0bf3a39e7f75d11ea4a56bafa344a33c931626ccc')
+            out['txoutset_hash'], '8f24c0bc714b85bf5c104f478f1948e691a5da934515a966e8eb2940adf4d6c7')
         assert_equal(out['nchaintx'], 101)
 
-        # Specifying a path to an existing file will fail.
+        # Specifying a path to an existing or invalid file will fail.
         assert_raises_rpc_error(
             -8, '{} already exists'.format(FILENAME),  node.dumptxoutset, FILENAME)
+        invalid_path = str(Path(node.datadir) / "invalid" / "path")
+        assert_raises_rpc_error(
+            -8, "Couldn't open file {}.incomplete for writing".format(invalid_path), node.dumptxoutset, invalid_path)
+
 
 if __name__ == '__main__':
     DumptxoutsetTest().main()

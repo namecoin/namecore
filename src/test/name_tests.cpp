@@ -34,6 +34,12 @@ BOOST_FIXTURE_TEST_SUITE(name_tests, TestingSetup)
 namespace
 {
 
+// From script_p2sh_tests
+bool IsStandardTx(const CTransaction& tx, std::string& reason)
+{
+    return IsStandardTx(tx, std::nullopt, DEFAULT_PERMIT_BAREMULTISIG, CFeeRate{DUST_RELAY_TX_FEE}, reason);
+}
+
 /**
  * Utility function that returns a sample address script to use in the tests.
  * @return A script that represents a simple address.

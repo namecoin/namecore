@@ -61,6 +61,12 @@ valtype DecodeNameFromRPCOrThrow (const UniValue& val, const UniValue& opt);
 valtype DecodeValueFromRPCOrThrow (const UniValue& val, const UniValue& opt);
 
 /**
+ * RPCResult for the "nameOp" field that is optionally returned from
+ * some RPCs that decode scripts.
+ */
+extern const RPCResult NameOpResult;
+
+/**
  * Builder class for the RPC results for methods that return information about
  * names (like name_show, name_scan, name_pending or name_list).  Since the
  * exact fields contained depend on the case, this class

@@ -1,4 +1,3 @@
-
 # manually added 2022-03 for minimal torv3 bootstrap support
 cy7xfmb6euixpk4mkng2t4fnlpw22n27sjovkiekvrd4ibcusxqzcbid.onion:8334
 higeqffshuqk2mlsvivjrpcu5hcio7pje4tfxgzgkqdarvsxtx6tprqd.onion:8334

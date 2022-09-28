@@ -466,7 +466,7 @@ UnexpireNames (unsigned nHeight, CBlockUndo& undo, CCoinsViewCache& view,
 }
 
 void
-CheckNameDB (CChainState& chainState, bool disconnect)
+CheckNameDB (Chainstate& chainState, bool disconnect)
 {
   const int option
     = gArgs.GetIntArg ("-checknamedb", Params ().DefaultCheckNameDB ());

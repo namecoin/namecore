@@ -11,6 +11,7 @@
 #include <primitives/pureheader.h>
 #include <serialize.h>
 #include <uint256.h>
+#include <util/time.h>
 
 #include <memory>
 
@@ -59,6 +60,7 @@ public:
      * the version accordingly.
      */
     void SetAuxpow (std::unique_ptr<CAuxPow> apow);
+
 };
 
 
@@ -121,7 +123,7 @@ struct CBlockLocator
 
     CBlockLocator() {}
 
-    explicit CBlockLocator(const std::vector<uint256>& vHaveIn) : vHave(vHaveIn) {}
+    explicit CBlockLocator(std::vector<uint256>&& have) : vHave(std::move(have)) {}
 
     SERIALIZE_METHODS(CBlockLocator, obj)
     {

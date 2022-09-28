@@ -68,27 +68,27 @@ public:
         AmountWithFeeExceedsBalance,
         DuplicateAddress,
         TransactionCreationFailed, // Error returned when wallet is still locked
-        AbsurdFee,
-        PaymentRequestExpired
+        AbsurdFee
     };
 
     enum EncryptionStatus
     {
+        NoKeys,       // wallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)
         Unencrypted,  // !wallet->IsCrypted()
         Locked,       // wallet->IsCrypted() && wallet->IsLocked()
         Unlocked      // wallet->IsCrypted() && !wallet->IsLocked()
     };
 
-    OptionsModel *getOptionsModel();
-    AddressTableModel *getAddressTableModel();
-    TransactionTableModel *getTransactionTableModel();
-    NameTableModel *getNameTableModel();
-    RecentRequestsTableModel *getRecentRequestsTableModel();
+    OptionsModel *getOptionsModel() const;
+    AddressTableModel *getAddressTableModel() const;
+    TransactionTableModel *getTransactionTableModel() const;
+    NameTableModel *getNameTableModel() const;
+    RecentRequestsTableModel *getRecentRequestsTableModel() const;
 
     EncryptionStatus getEncryptionStatus() const;
 
     // Check address for validity
-    bool validateAddress(const QString &address);
+    bool validateAddress(const QString& address) const;
 
     // Return status record for SendCoins, contains error id + information
     struct SendCoinsReturn
@@ -106,7 +106,7 @@ public:
     SendCoinsReturn prepareTransaction(WalletModelTransaction &transaction, const wallet::CCoinControl& coinControl);
 
     // Send coins to a list of recipients
-    SendCoinsReturn sendCoins(WalletModelTransaction &transaction);
+    void sendCoins(WalletModelTransaction& transaction);
 
     // Wallet encryption
     bool setWalletEncrypted(const SecureString& passphrase);
@@ -140,7 +140,7 @@ public:
     UnlockContext requestUnlock();
 
     bool bumpFee(uint256 hash, uint256& new_hash);
-    bool displayAddress(std::string sAddress);
+    bool displayAddress(std::string sAddress) const;
 
     static bool isWalletEnabled();
 
@@ -152,13 +152,18 @@ public:
     QString getWalletName() const;
     QString getDisplayName() const;
 
-    bool isMultiwallet();
-
-    AddressTableModel* getAddressTableModel() const { return addressTableModel; }
+    bool isMultiwallet() const;
 
     void refresh(bool pk_hash_only = false);
 
     uint256 getLastBlockProcessed() const;
+
+    // Retrieve the cached wallet balance
+    interfaces::WalletBalances getCachedBalance() const;
+
+    // If coin control has selected outputs, searches the total amount inside the wallet.
+    // Otherwise, uses the wallet's cached available balance.
+    CAmount getAvailableBalance(const wallet::CCoinControl* control);
 
 private:
     std::unique_ptr<interfaces::Wallet> m_wallet;

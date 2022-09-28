@@ -8,7 +8,10 @@
 
 #include <consensus/amount.h>
 #include <uint256.h>
+
+#include <chrono>
 #include <limits>
+#include <map>
 
 #include <memory>
 
@@ -111,11 +114,11 @@ constexpr bool ValidDeployment(DeploymentPos dep) { return dep < MAX_VERSION_BIT
  */
 struct BIP9Deployment {
     /** Bit position to select the particular bit in nVersion. */
-    int bit;
+    int bit{28};
     /** Start MedianTime for version bits miner confirmation. Can be a date in the past */
-    int64_t nStartTime;
+    int64_t nStartTime{NEVER_ACTIVE};
     /** Timeout/expiry MedianTime for the deployment attempt. */
-    int64_t nTimeout;
+    int64_t nTimeout{NEVER_ACTIVE};
     /** If lock in occurs, delay activation until at least this block
      *  height.  Note that activation will only occur on a retarget
      *  boundary.
@@ -143,6 +146,13 @@ struct BIP9Deployment {
 struct Params {
     uint256 hashGenesisBlock;
     int nSubsidyHalvingInterval;
+    /**
+     * Hashes of blocks that
+     * - are known to be consensus valid, and
+     * - buried in the chain, and
+     * - fail if the default script verify flags are applied.
+     */
+    std::map<uint256, uint32_t> script_flag_exceptions;
     /** Block height at with BIP16 becomes active */
     int BIP16Height;
     /** Block height and hash at which BIP34 becomes active */
@@ -176,6 +186,10 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
+    std::chrono::seconds PowTargetSpacing() const
+    {
+        return std::chrono::seconds{nPowTargetSpacing};
+    }
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     /** The best chain should have at least this much work */
     uint256 nMinimumChainWork;

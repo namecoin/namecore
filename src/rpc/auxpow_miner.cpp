@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021 Daniel Kraft
+// Copyright (c) 2018-2022 Daniel Kraft
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,6 +7,7 @@
 #include <arith_uint256.h>
 #include <auxpow.h>
 #include <chainparams.h>
+#include <consensus/merkle.h>
 #include <net.h>
 #include <node/context.h>
 #include <rpc/blockchain.h>
@@ -81,7 +82,7 @@ AuxpowMiner::getCurrentBlock (const ChainstateManager& chainman,
 
         /* Create new block with nonce = 0 and extraNonce = 1.  */
         std::unique_ptr<node::CBlockTemplate> newBlock
-            = BlockAssembler (chainman.ActiveChainstate (), mempool, Params ())
+            = BlockAssembler (chainman.ActiveChainstate (), &mempool)
                 .CreateNewBlock (scriptPubKey);
         if (newBlock == nullptr)
           throw JSONRPCError (RPC_OUT_OF_MEMORY, "out of memory");
@@ -92,7 +93,7 @@ AuxpowMiner::getCurrentBlock (const ChainstateManager& chainman,
         startTime = GetTime ();
 
         /* Finalise it by setting the version and building the merkle root.  */
-        node::IncrementExtraNonce (&newBlock->block, pindexPrev, extraNonce);
+        newBlock->block.hashMerkleRoot = BlockMerkleRoot (newBlock->block);
         newBlock->block.SetAuxpowVersion (true);
 
         /* Save in our map of constructed blocks.  */
@@ -185,7 +186,8 @@ AuxpowMiner::submitAuxBlock (const JSONRPCRequest& request,
   shared_block->SetAuxpow (std::move (pow));
   assert (shared_block->GetHash ().GetHex () == hashHex);
 
-  return chainman.ProcessNewBlock (Params (), shared_block, true, nullptr);
+  return chainman.ProcessNewBlock (shared_block, /*force_processing=*/true,
+                                   /*min_pow_checked=*/true, nullptr);
 }
 
 AuxpowMiner&

@@ -4,7 +4,7 @@
         {
             "asm": "OP_NAME_NEW eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
             "address": "ncrt1pamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhqlpz448",
-            "desc": "addr(ncrt1pamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhwamhqlpz448)#6p37fpaq",
+            "desc": "rawtr(eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)#jk7c6kys",
             "type": "witness_v1_taproot"
         }
     ],

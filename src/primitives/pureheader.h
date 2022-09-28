@@ -8,6 +8,7 @@
 
 #include <serialize.h>
 #include <uint256.h>
+#include <util/time.h>
 
 /**
  * A block header without auxpow information.  This "intermediate step"
@@ -58,6 +59,11 @@ public:
     }
 
     uint256 GetHash() const;
+
+    NodeSeconds Time() const
+    {
+        return NodeSeconds{std::chrono::seconds{nTime}};
+    }
 
     int64_t GetBlockTime() const
     {

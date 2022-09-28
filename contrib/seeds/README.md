@@ -14,15 +14,3 @@ The seeds compiled into the release are created from jonasbits's DNS seed data, 
     python3 makeseeds.py < seeds_main.txt > nodes_main.txt
     cat nodes_main_manual.txt >> nodes_main.txt
     python3 generate-seeds.py . > ../../src/chainparamsseeds.h
-
-## Dependencies
-
-Ubuntu, Debian:
-
-    sudo apt-get install python3-dnspython
-
-and/or for other operating systems:
-
-    pip install dnspython
-
-See https://dnspython.readthedocs.io/en/latest/installation.html for more information.

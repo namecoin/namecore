@@ -2,6 +2,7 @@
 #define NAMETABLEMODEL_H
 
 #include <qt/bitcoinunits.h>
+#include <qt/clientmodel.h>
 
 #include <QAbstractTableModel>
 #include <QDateTime>
@@ -69,7 +70,7 @@ private:
 
 public Q_SLOTS:
     void init();
-    void updateExpiration(int count, const QDateTime& blockDate, double nVerificationProgress, bool header, SynchronizationState sync_state);
+    void updateExpiration(int count, const QDateTime& blockDate, double nVerificationProgress, SyncType header, SynchronizationState sync_state);
     void processNewTransaction(const QModelIndex& parent, int start, int /*end*/);
 
     friend class NameTablePriv;

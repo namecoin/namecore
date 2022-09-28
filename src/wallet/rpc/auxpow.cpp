@@ -81,15 +81,14 @@ public:
       return mit->second.coinbaseScript;
 
     ReserveDestination rdest(pwallet, pwallet->m_default_address_type);
-    CTxDestination dest;
-    bilingual_str dest_err;
-    if (!rdest.GetReservedDestination (dest, false, dest_err))
+    const auto op_dest = rdest.GetReservedDestination (false);
+    if (!op_dest)
       throw JSONRPCError (RPC_WALLET_KEYPOOL_RAN_OUT,
                           strprintf ("Failed to generate mining address: %s",
-                                     dest_err.original));
+                                     util::ErrorString (op_dest).original));
     rdest.KeepDestination ();
 
-    const CScript res = GetScriptForDestination (dest);
+    const CScript res = GetScriptForDestination (*op_dest);
     data.emplace (pwallet->GetName (), PerWallet (res));
     return res;
   }

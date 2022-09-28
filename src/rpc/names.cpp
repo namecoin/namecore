@@ -277,7 +277,7 @@ public:
     catch (const UniValue& exc)
       {
         const auto& code = exc["code"];
-        if (!code.isNum () || code.get_int () != RPC_WALLET_NOT_SPECIFIED)
+        if (!code.isNum () || code.getInt<int> () != RPC_WALLET_NOT_SPECIFIED)
           throw;
 
       }
@@ -341,19 +341,36 @@ getNameInfo (const ChainstateManager& chainman, const UniValue& options,
   return res;
 }
 
+/** Named constant for optional RPCResult fields.  */
+constexpr bool optional = true;
+
 } // anonymous namespace
+
+const RPCResult NameOpResult{RPCResult::Type::OBJ, "nameOp", optional,
+    "The encoded name-operation (if the script has one)",
+    {
+      {RPCResult::Type::STR, "op", "The type of operation"},
+      {RPCResult::Type::STR_HEX, "hash", optional, "Hash value for name_new"},
+      {RPCResult::Type::STR_HEX, "rand", optional, "Seed value for name_firstupdate"},
+      {RPCResult::Type::STR, "name", optional, "Name for updates"},
+      {RPCResult::Type::STR, "name_error", optional, "Encoding error for the name, if any"},
+      {RPCResult::Type::STR, "name_encoding", optional, "Encoding of the name"},
+      {RPCResult::Type::STR, "value", optional, "Value for updates"},
+      {RPCResult::Type::STR, "value_error", optional, "Encoding error for the value, if any"},
+      {RPCResult::Type::STR, "value_encoding", optional, "Encoding of the value"},
+    }};
 
 /* ************************************************************************** */
 
 NameInfoHelp::NameInfoHelp ()
 {
-  withField ({RPCResult::Type::STR, "name", "the requested name"});
+  withField ({RPCResult::Type::STR, "name", optional, "the requested name"});
   withField ({RPCResult::Type::STR, "name_encoding", "the encoding of \"name\""});
-  withField ({RPCResult::Type::STR, "name_error",
+  withField ({RPCResult::Type::STR, "name_error", optional,
               "replaces \"name\" in case there is an error"});
-  withField ({RPCResult::Type::STR, "value", "the name's current value"});
+  withField ({RPCResult::Type::STR, "value", optional, "the name's current value"});
   withField ({RPCResult::Type::STR, "value_encoding", "the encoding of \"value\""});
-  withField ({RPCResult::Type::STR, "value_error",
+  withField ({RPCResult::Type::STR, "value_error", optional,
               "replaces \"value\" in case there is an error"});
 
   withField ({RPCResult::Type::STR_HEX, "txid", "the name's last update tx"});
@@ -361,7 +378,7 @@ NameInfoHelp::NameInfoHelp ()
               "the index of the name output in the last update"});
   withField ({RPCResult::Type::STR, "address", "the address holding the name"});
 #ifdef ENABLE_WALLET
-  withField ({RPCResult::Type::BOOL, "ismine",
+  withField ({RPCResult::Type::BOOL, "ismine", optional,
               "whether the name is owned by the wallet"});
 #endif
 }
@@ -688,7 +705,7 @@ name_scan ()
 
   int count = 500;
   if (!request.params[1].isNull ())
-    count = request.params[1].get_int ();
+    count = request.params[1].getInt<int> ();
 
   /* Parse and interpret the name_scan-specific options.  */
   RPCTypeCheckObj (options,
@@ -702,14 +719,14 @@ name_scan ()
 
   int minConf = 1;
   if (options.exists ("minConf"))
-    minConf = options["minConf"].get_int ();
+    minConf = options["minConf"].getInt<int> ();
   if (minConf < 1)
     throw JSONRPCError (RPC_INVALID_PARAMETER, "minConf must be >= 1");
 
   int maxConf = -1;
   if (options.exists ("maxConf"))
     {
-      maxConf = options["maxConf"].get_int ();
+      maxConf = options["maxConf"].getInt<int> ();
       if (maxConf < 0)
         throw JSONRPCError (RPC_INVALID_PARAMETER,
                             "maxConf must not be negative");
@@ -802,7 +819,6 @@ name_pending ()
           {
               NameInfoHelp ()
                 .withField ({RPCResult::Type::STR, "op", "the operation being performed"})
-                .withExpiration ()
                 .finish ()
           }
       },
@@ -929,7 +945,7 @@ PerformNameRawtx (const unsigned nOut, const UniValue& nameOp,
       else
         {
           rand.resize (20);
-          GetRandBytes (&rand[0], rand.size ());
+          GetRandBytes (rand);
         }
 
       const valtype name
@@ -1025,8 +1041,8 @@ namerawtransaction ()
 
   UniValue result(UniValue::VOBJ);
 
-  PerformNameRawtx (request.params[1].get_int (), request.params[2].get_obj (),
-                    mtx, result);
+  PerformNameRawtx (request.params[1].getInt<int> (),
+                    request.params[2].get_obj (), mtx, result);
 
   result.pushKV ("hex", EncodeHexTx (CTransaction (mtx)));
   return result;
@@ -1077,8 +1093,8 @@ namepsbt ()
 
   UniValue result(UniValue::VOBJ);
 
-  PerformNameRawtx (request.params[1].get_int (), request.params[2].get_obj (),
-                    *psbtx.tx, result);
+  PerformNameRawtx (request.params[1].getInt<int> (),
+                    request.params[2].get_obj (), *psbtx.tx, result);
 
   CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
   ssTx << psbtx;

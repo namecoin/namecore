@@ -1,10 +1,9 @@
-// Copyright (c) 2012-2019 The Bitcoin Core developers
+// Copyright (c) 2012-2021 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <script/names.h>
 #include <script/script.h>
-
 #include <test/util/setup_common.h>
 
 #include <boost/test/unit_test.hpp>
@@ -111,12 +110,14 @@ bool IsNoWitnessProgram(const bool allowNames, const CScript& script)
 
 BOOST_AUTO_TEST_CASE(IsWitnessProgram_Valid)
 {
+    // Witness programs have a minimum data push of 2 bytes.
     std::vector<unsigned char> program = {42, 18};
     CScript wit;
     wit << OP_0 << program;
     BOOST_CHECK(IsExpectedWitnessProgram(false, wit, 0, program));
 
     wit.clear();
+    // Witness programs have a maximum data push of 40 bytes.
     program.resize(40);
     wit << OP_16 << program;
     BOOST_CHECK(IsExpectedWitnessProgram(false, wit, 16, program));

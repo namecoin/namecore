@@ -5,6 +5,7 @@
 #include <qt/transactiontablemodel.h>
 
 #include <qt/addresstablemodel.h>
+#include <qt/bitcoinunits.h>
 #include <qt/clientmodel.h>
 #include <qt/guiconstants.h>
 #include <qt/guiutil.h>
@@ -16,6 +17,7 @@
 
 #include <core_io.h>
 #include <interfaces/handler.h>
+#include <names/applications.h>
 #include <uint256.h>
 
 #include <algorithm>
@@ -32,11 +34,11 @@
 
 // Amount column is right-aligned it contains numbers
 static int column_alignments[] = {
-        Qt::AlignLeft|Qt::AlignVCenter, /* status */
-        Qt::AlignLeft|Qt::AlignVCenter, /* watchonly */
-        Qt::AlignLeft|Qt::AlignVCenter, /* date */
-        Qt::AlignLeft|Qt::AlignVCenter, /* type */
-        Qt::AlignLeft|Qt::AlignVCenter, /* address */
+        Qt::AlignLeft|Qt::AlignVCenter, /*status=*/
+        Qt::AlignLeft|Qt::AlignVCenter, /*watchonly=*/
+        Qt::AlignLeft|Qt::AlignVCenter, /*date=*/
+        Qt::AlignLeft|Qt::AlignVCenter, /*type=*/
+        Qt::AlignLeft|Qt::AlignVCenter, /*address=*/
         Qt::AlignRight|Qt::AlignVCenter /* amount */
     };
 
@@ -61,7 +63,7 @@ struct TxLessThan
 struct TransactionNotification
 {
 public:
-    TransactionNotification() {}
+    TransactionNotification() = default;
     TransactionNotification(uint256 _hash, ChangeType _status, bool _showTransaction):
         hash(_hash), status(_status), showTransaction(_showTransaction) {}
 
@@ -232,7 +234,7 @@ public:
         return nullptr;
     }
 
-    QString describe(interfaces::Node& node, interfaces::Wallet& wallet, TransactionRecord *rec, int unit)
+    QString describe(interfaces::Node& node, interfaces::Wallet& wallet, TransactionRecord* rec, BitcoinUnit unit)
     {
         return TransactionDesc::toHTML(node, wallet, rec, unit);
     }
@@ -385,24 +387,52 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::Generated:
         return tr("Mined");
     case TransactionRecord::NameOp:
+    {
+        QString namespaceStrCap;
+        QString namespaceStrLow;
+        switch(wtx->nameNamespace)
+        {
+        case NameNamespace::Domain:
+            namespaceStrCap = tr("Domain");
+            namespaceStrLow = tr("domain");
+            break;
+        case NameNamespace::DomainData:
+            namespaceStrCap = tr("Domain data");
+            namespaceStrLow = tr("domain data");
+            break;
+        case NameNamespace::Identity:
+            namespaceStrCap = tr("Identity");
+            namespaceStrLow = tr("identity");
+            break;
+        case NameNamespace::IdentityData:
+            namespaceStrCap = tr("Identity data");
+            namespaceStrLow = tr("identity data");
+            break;
+        case NameNamespace::NonStandard:
+            namespaceStrCap = tr("Non-standard name");
+            namespaceStrLow = tr("non-standard name");
+            break;
+        }
+
         switch(wtx->nameOpType)
         {
         case TransactionRecord::NameOpType::New:
             return tr("Name pre-registration");
         case TransactionRecord::NameOpType::FirstUpdate:
-            return tr("Name registration");
+            return tr("%1 registration").arg(namespaceStrCap);
         case TransactionRecord::NameOpType::Update:
-            return tr("Name update");
+            return tr("%1 update").arg(namespaceStrCap);
         case TransactionRecord::NameOpType::Renew:
-            return tr("Name renewal");
+            return tr("%1 renewal").arg(namespaceStrCap);
         case TransactionRecord::NameOpType::Recv:
-            return tr("Received name");
+            return tr("Received %1").arg(namespaceStrLow);
         case TransactionRecord::NameOpType::Send:
-            return tr("Sent name");
+            return tr("Sent %1").arg(namespaceStrLow);
         case TransactionRecord::NameOpType::Other:
             return tr("Unknown name operation");
         } // no default case, so the compiler can warn about missing cases
         assert(false);
+    }
     default:
         return QString();
     }

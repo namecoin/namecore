@@ -8,7 +8,7 @@
 #include <chainparams.h>
 #include <interfaces/wallet.h>
 #include <key_io.h>
-#include <names/encoding.h>
+#include <names/applications.h>
 #include <script/names.h>
 #include <wallet/ismine.h>
 
@@ -132,7 +132,8 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                     nameSub.nameOpType = TransactionRecord::NameOpType::Recv;
                 }
 
-                nameSub.address = EncodeNameForMessage(nNameCredit.value().getOpName());
+                nameSub.nameNamespace = NamespaceFromName(nNameCredit.value().getOpName());
+                nameSub.address = DescFromName(nNameCredit.value().getOpName(), nameSub.nameNamespace);
             }
             else
             {
@@ -145,7 +146,8 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
 
             if(nNameDebit.value().isAnyUpdate())
             {
-                nameSub.address = EncodeNameForMessage(nNameDebit.value().getOpName());
+                nameSub.nameNamespace = NamespaceFromName(nNameDebit.value().getOpName());
+                nameSub.address = DescFromName(nNameDebit.value().getOpName(), nameSub.nameNamespace);
             }
         }
 

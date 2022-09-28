@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020 Daniel Kraft
+// Copyright (c) 2019-2022 Daniel Kraft
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -38,24 +38,21 @@ private:
 
   const std::unique_ptr<DB> db;
 
+  bool AllowPrune() const override { return false; }
+
 protected:
 
-    bool WriteBlock (const CBlock& block, const CBlockIndex* pindex) override;
+    bool CustomAppend (const interfaces::BlockInfo& block) override;
 
     BaseIndex::DB& GetDB () const override;
-
-    const char*
-    GetName () const override
-    {
-      return "namehash";
-    }
 
 public:
 
     /**
      * Constructs the index, which becomes available to be queried.
      */
-    explicit NameHashIndex (size_t cache_size, bool memory, bool wipe);
+    explicit NameHashIndex (std::unique_ptr<interfaces::Chain> chain,
+                            size_t cache_size, bool memory, bool wipe);
 
     ~NameHashIndex ();
 

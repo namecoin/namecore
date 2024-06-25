@@ -112,7 +112,9 @@ BITCOIN_TESTS =\
   test/multisig_tests.cpp \
   test/name_tests.cpp \
   test/name_applications_tests.cpp \
+  test/name_domain_tests.cpp \
   test/name_mempool_tests.cpp \
+  test/name_records_tests.cpp \
   test/net_peer_connection_tests.cpp \
   test/net_peer_eviction_tests.cpp \
   test/net_tests.cpp \
